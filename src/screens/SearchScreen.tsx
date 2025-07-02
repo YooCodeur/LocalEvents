@@ -110,7 +110,7 @@ export default function SearchScreen() {
 
         {/* Mot-clé de recherche */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>🎪 Mot-clé (optionnel)</Text>
+          <Text style={styles.sectionTitle}>Mot-clé (optionnel)</Text>
           <TextInput
             style={styles.textInput}
             placeholder="Ex: concert, théâtre, rock..."
@@ -141,7 +141,7 @@ export default function SearchScreen() {
 
         {/* Ville */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>🏙️ Ville</Text>
+          <Text style={styles.sectionTitle}>Ville</Text>
           <TextInput
             style={styles.textInput}
             placeholder="Ex: Paris, Lyon, Marseille..."
@@ -172,7 +172,7 @@ export default function SearchScreen() {
 
         {/* Filtres de dates */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>📅 Période (optionnel)</Text>
+          <Text style={styles.sectionTitle}>Période (optionnel)</Text>
           
           <View style={styles.dateContainer}>
             <View style={styles.dateInput}>
@@ -228,16 +228,7 @@ export default function SearchScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Instructions */}
-        <View style={styles.instructionsSection}>
-          <Text style={styles.instructionsTitle}>ℹ️ Comment utiliser</Text>
-          <Text style={styles.instructionsText}>
-            • <Text style={styles.bold}>Mot-clé</Text> : Tapez "rock", "concert", "enfants"...{'\n'}
-            • <Text style={styles.bold}>Ville</Text> : Choisissez ou tapez une ville française{'\n'}
-            • <Text style={styles.bold}>Dates</Text> : Filtrez par période spécifique{'\n'}
-            • <Text style={styles.bold}>Résultats</Text> : Consultez l'onglet "Événements" après recherche
-          </Text>
-        </View>
+    
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -387,8 +378,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#e3f2fd',
     borderRadius: 12,
     padding: 16,
-    borderLeftWidth: 4,
-    borderLeftColor: '#2196f3',
   },
   instructionsTitle: {
     fontSize: 16,
