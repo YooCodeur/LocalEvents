@@ -10,6 +10,8 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { Ionicons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '../store';
 import { searchEvents, setSearchParams, clearEvents } from '../store/slices/eventsSlice';
@@ -22,8 +24,16 @@ export default function SearchScreen() {
   // États locaux pour les filtres
   const [keyword, setKeyword] = useState(searchParams.keyword || '');
   const [city, setCity] = useState(searchParams.city || 'Paris');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
+  
+  // États pour contrôler la visibilité des DateTimePickers
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
+  
+  // États temporaires pour iOS (confirmation)
+  const [tempStartDate, setTempStartDate] = useState<Date | null>(null);
+  const [tempEndDate, setTempEndDate] = useState<Date | null>(null);
 
   // Suggestions de villes populaires
   const popularCities = [
@@ -37,13 +47,110 @@ export default function SearchScreen() {
     'rock', 'jazz', 'classique', 'enfants', 'famille'
   ];
 
+  // Fonction pour formater une date en string pour l'API (ISO 8601 avec timezone)
+  const formatDateForAPI = (date: Date, isEndDate: boolean = false): string => {
+    // Format ISO 8601 attendu par l'API Ticketmaster: YYYY-MM-DDTHH:mm:ssZ
+    const isoString = date.toISOString();
+    const dateOnly = isoString.split('T')[0];
+    
+    // Pour la date de début : 00:00:00, pour la date de fin : 23:59:59
+    const timeString = isEndDate ? '23:59:59Z' : '00:00:00Z';
+    return dateOnly + 'T' + timeString;
+  };
+
+  // Fonction pour formater une date pour l'affichage
+  const formatDateForDisplay = (date: Date): string => {
+    return date.toLocaleDateString('fr-FR', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+  };
+
+  // Gestionnaires pour les DateTimePickers
+  const onStartDateChange = (event: any, selectedDate?: Date) => {
+    if (Platform.OS === 'android') {
+      // Sur Android, sélection directe
+      setShowStartPicker(false);
+      if (selectedDate) {
+        setStartDate(selectedDate);
+      }
+    } else {
+      // Sur iOS, stockage temporaire pour confirmation
+      if (selectedDate) {
+        setTempStartDate(selectedDate);
+      }
+    }
+  };
+
+  const onEndDateChange = (event: any, selectedDate?: Date) => {
+    if (Platform.OS === 'android') {
+      // Sur Android, sélection directe
+      setShowEndPicker(false);
+      if (selectedDate) {
+        setEndDate(selectedDate);
+      }
+    } else {
+      // Sur iOS, stockage temporaire pour confirmation
+      if (selectedDate) {
+        setTempEndDate(selectedDate);
+      }
+    }
+  };
+
+  // Confirmer la date de début (iOS uniquement)
+  const confirmStartDate = () => {
+    if (tempStartDate) {
+      setStartDate(tempStartDate);
+    }
+    setShowStartPicker(false);
+    setTempStartDate(null);
+  };
+
+  // Annuler la date de début (iOS uniquement)
+  const cancelStartDate = () => {
+    setShowStartPicker(false);
+    setTempStartDate(null);
+  };
+
+  // Confirmer la date de fin (iOS uniquement)
+  const confirmEndDate = () => {
+    if (tempEndDate) {
+      setEndDate(tempEndDate);
+    }
+    setShowEndPicker(false);
+    setTempEndDate(null);
+  };
+
+  // Annuler la date de fin (iOS uniquement)
+  const cancelEndDate = () => {
+    setShowEndPicker(false);
+    setTempEndDate(null);
+  };
+
+  // Ouvrir le sélecteur de date de début
+  const openStartPicker = () => {
+    if (Platform.OS === 'ios') {
+      setTempStartDate(startDate || new Date());
+    }
+    setShowStartPicker(true);
+  };
+
+  // Ouvrir le sélecteur de date de fin
+  const openEndPicker = () => {
+    if (Platform.OS === 'ios') {
+      setTempEndDate(endDate || startDate || new Date());
+    }
+    setShowEndPicker(true);
+  };
+
   // Lancer la recherche
   const handleSearch = useCallback(() => {
     const params: SearchParams = {
       keyword: keyword.trim() || undefined,
       city: city.trim() || 'Paris',
-      startDateTime: startDate || undefined,
-      endDateTime: endDate || undefined,
+      startDateTime: startDate ? formatDateForAPI(startDate, false) : undefined,
+      endDateTime: endDate ? formatDateForAPI(endDate, true) : undefined,
       size: 20,
       page: 0,
     };
@@ -66,8 +173,8 @@ export default function SearchScreen() {
   const handleReset = useCallback(() => {
     setKeyword('');
     setCity('Paris');
-    setStartDate('');
-    setEndDate('');
+    setStartDate(null);
+    setEndDate(null);
     
     const defaultParams: SearchParams = {
       city: 'Paris',
@@ -102,7 +209,10 @@ export default function SearchScreen() {
       >
         {/* En-tête */}
         <View style={styles.header}>
-          <Text style={styles.title}>🔍 Recherche d'événements</Text>
+          <View style={styles.titleContainer}>
+            <Ionicons name="search" size={32} color="#007AFF" style={styles.titleIcon} />
+            <Text style={styles.title}>Recherche d'événements</Text>
+          </View>
           <Text style={styles.subtitle}>
             Trouvez des événements par ville, dates ou mots-clés
           </Text>
@@ -175,36 +285,131 @@ export default function SearchScreen() {
           <Text style={styles.sectionTitle}>Période (optionnel)</Text>
           
           <View style={styles.dateContainer}>
+            {/* Date de début */}
             <View style={styles.dateInput}>
               <Text style={styles.dateLabel}>Date de début :</Text>
-              <TextInput
-                style={styles.textInput}
-                placeholder="YYYY-MM-DD"
-                value={startDate}
-                onChangeText={setStartDate}
-                autoCapitalize="none"
-                autoCorrect={false}
-                keyboardType="numeric"
-              />
+              <TouchableOpacity
+                style={styles.dateButton}
+                onPress={openStartPicker}
+              >
+                <View style={styles.dateButtonContent}>
+                  <Ionicons 
+                    name="calendar-outline" 
+                    size={20} 
+                    color="#007AFF" 
+                    style={styles.dateButtonIcon} 
+                  />
+                  <Text style={styles.dateButtonText}>
+                    {startDate ? formatDateForDisplay(startDate) : 'Sélectionner une date'}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+              
+              {showStartPicker && (
+                <View>
+                  <DateTimePicker
+                    value={Platform.OS === 'ios' ? (tempStartDate || startDate || new Date()) : (startDate || new Date())}
+                    mode="date"
+                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                    onChange={onStartDateChange}
+                    minimumDate={new Date()}
+                  />
+                  
+                  {/* Boutons de confirmation pour iOS */}
+                  {Platform.OS === 'ios' && (
+                    <View style={styles.confirmButtonsContainer}>
+                      <TouchableOpacity style={styles.cancelButton} onPress={cancelStartDate}>
+                        <Text style={styles.cancelButtonText}>Annuler</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.confirmButton} onPress={confirmStartDate}>
+                        <Text style={styles.confirmButtonText}>Confirmer</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </View>
+              )}
             </View>
             
+            {/* Date de fin */}
             <View style={styles.dateInput}>
               <Text style={styles.dateLabel}>Date de fin :</Text>
-              <TextInput
-                style={styles.textInput}
-                placeholder="YYYY-MM-DD"
-                value={endDate}
-                onChangeText={setEndDate}
-                autoCapitalize="none"
-                autoCorrect={false}
-                keyboardType="numeric"
-              />
+              <TouchableOpacity
+                style={styles.dateButton}
+                onPress={openEndPicker}
+              >
+                <View style={styles.dateButtonContent}>
+                  <Ionicons 
+                    name="calendar-outline" 
+                    size={20} 
+                    color="#007AFF" 
+                    style={styles.dateButtonIcon} 
+                  />
+                  <Text style={styles.dateButtonText}>
+                    {endDate ? formatDateForDisplay(endDate) : 'Sélectionner une date'}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+              
+              {showEndPicker && (
+                <View>
+                  <DateTimePicker
+                    value={Platform.OS === 'ios' ? (tempEndDate || endDate || startDate || new Date()) : (endDate || startDate || new Date())}
+                    mode="date"
+                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                    onChange={onEndDateChange}
+                    minimumDate={startDate || new Date()}
+                  />
+                  
+                  {/* Boutons de confirmation pour iOS */}
+                  {Platform.OS === 'ios' && (
+                    <View style={styles.confirmButtonsContainer}>
+                      <TouchableOpacity style={styles.cancelButton} onPress={cancelEndDate}>
+                        <Text style={styles.cancelButtonText}>Annuler</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.confirmButton} onPress={confirmEndDate}>
+                        <Text style={styles.confirmButtonText}>Confirmer</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </View>
+              )}
             </View>
+            
+            {/* Boutons pour effacer les dates */}
+            {(startDate || endDate) && (
+              <View style={styles.dateActionsContainer}>
+                {startDate && (
+                  <TouchableOpacity
+                    style={styles.clearDateButton}
+                    onPress={() => setStartDate(null)}
+                  >
+                    <View style={styles.clearButtonContent}>
+                      <Ionicons name="trash-outline" size={16} color="#dc3545" />
+                      <Text style={styles.clearDateText}>Effacer début</Text>
+                    </View>
+                  </TouchableOpacity>
+                )}
+                {endDate && (
+                  <TouchableOpacity
+                    style={styles.clearDateButton}
+                    onPress={() => setEndDate(null)}
+                  >
+                    <View style={styles.clearButtonContent}>
+                      <Ionicons name="trash-outline" size={16} color="#dc3545" />
+                      <Text style={styles.clearDateText}>Effacer fin</Text>
+                    </View>
+                  </TouchableOpacity>
+                )}
+              </View>
+            )}
           </View>
           
-          <Text style={styles.dateHelper}>
-            💡 Format : YYYY-MM-DD (ex: 2024-12-25)
-          </Text>
+          <View style={styles.helperContainer}>
+            <Ionicons name="information-circle-outline" size={16} color="#6c757d" />
+            <Text style={styles.dateHelper}>
+              Sélectionnez des dates pour filtrer les événements dans une période précise
+            </Text>
+          </View>
         </View>
 
         {/* Boutons d'action */}
@@ -214,9 +419,17 @@ export default function SearchScreen() {
             onPress={handleSearch}
             disabled={loading}
           >
-            <Text style={styles.actionButtonText}>
-              {loading ? '🔍 Recherche...' : '🔍 Rechercher'}
-            </Text>
+            <View style={styles.actionButtonContent}>
+              <Ionicons 
+                name={loading ? "hourglass-outline" : "search"} 
+                size={20} 
+                color="#fff" 
+                style={styles.actionButtonIcon}
+              />
+              <Text style={styles.actionButtonText}>
+                {loading ? 'Recherche...' : 'Rechercher'}
+              </Text>
+            </View>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -224,7 +437,15 @@ export default function SearchScreen() {
             onPress={handleReset}
             disabled={loading}
           >
-            <Text style={styles.resetButtonText}>🔄 Réinitialiser</Text>
+            <View style={styles.actionButtonContent}>
+              <Ionicons 
+                name="refresh-outline" 
+                size={20} 
+                color="#6c757d" 
+                style={styles.actionButtonIcon}
+              />
+              <Text style={styles.resetButtonText}>Réinitialiser</Text>
+            </View>
           </TouchableOpacity>
         </View>
 
@@ -392,5 +613,107 @@ const styles = StyleSheet.create({
   },
   bold: {
     fontWeight: 'bold',
+  },
+  dateButton: {
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#dee2e6',
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  dateButtonText: {
+    fontSize: 16,
+    color: '#212529',
+    fontWeight: '500',
+  },
+  dateActionsContainer: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  clearDateButton: {
+    padding: 8,
+    borderWidth: 1,
+    borderColor: '#dee2e6',
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  clearDateText: {
+    fontSize: 14,
+    color: '#6c757d',
+    fontWeight: '500',
+  },
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  titleIcon: {
+    marginRight: 12,
+  },
+  dateButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dateButtonIcon: {
+    marginRight: 8,
+  },
+  clearButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  helperContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+    marginTop: 12,
+  },
+  actionButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  actionButtonIcon: {
+    marginRight: 8,
+  },
+  // Styles pour la confirmation iOS
+  confirmButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    backgroundColor: '#f8f9fa',
+    borderTopWidth: 1,
+    borderTopColor: '#dee2e6',
+  },
+  cancelButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#dc3545',
+    borderRadius: 8,
+    minWidth: 100,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    color: '#dc3545',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  confirmButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    backgroundColor: '#007AFF',
+    borderRadius: 8,
+    minWidth: 100,
+    alignItems: 'center',
+  },
+  confirmButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 }); 

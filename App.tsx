@@ -1,9 +1,11 @@
 import React, { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
+import { Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Provider, useDispatch } from 'react-redux';
+import { Ionicons } from '@expo/vector-icons';
 import { store, AppDispatch } from './src/store';
 import { loadFavorites } from './src/store/slices/favoritesSlice';
 
@@ -33,7 +35,9 @@ function MainTabs() {
         component={EventsScreen}
         options={{
           title: 'Événements',
-          tabBarIcon: () => '🎪',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="calendar" size={size} color={color} />
+          ),
         }}
       />
       <Tab.Screen 
@@ -41,7 +45,9 @@ function MainTabs() {
         component={SearchScreen}
         options={{
           title: 'Recherche',
-          tabBarIcon: () => '🔍',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="search" size={size} color={color} />
+          ),
         }}
       />
       <Tab.Screen 
@@ -49,7 +55,9 @@ function MainTabs() {
         component={FavoritesScreen}
         options={{
           title: 'Favoris',
-          tabBarIcon: () => '❤️',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="heart" size={size} color={color} />
+          ),
         }}
       />
     </Tab.Navigator>
@@ -70,7 +78,7 @@ function AppNavigator() {
           name="EventDetail" 
           component={EventDetailScreen}
           options={{
-            title: 'Détails de l\'événement',
+            title: "Détails de l'événement",
             headerBackTitle: 'Retour',
           }}
         />

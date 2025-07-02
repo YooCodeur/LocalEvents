@@ -223,8 +223,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 6,
     elevation: 8,
-    borderLeftWidth: 4,
-    borderLeftColor: '#dc3545',
+  
   },
   favoriteImage: {
     width: 90,
