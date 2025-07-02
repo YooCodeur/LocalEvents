@@ -1,22 +1,22 @@
-import React, { useEffect } from 'react';
-import { StatusBar } from 'expo-status-bar';
-import { Text } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Provider, useDispatch } from 'react-redux';
-import { Ionicons } from '@expo/vector-icons';
-import { store, AppDispatch } from './src/store';
-import { loadFavorites } from './src/store/slices/favoritesSlice';
+import React, { useEffect } from "react";
+import { StatusBar } from "expo-status-bar";
+
+import { NavigationContainer } from "@react-navigation/native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { Provider, useDispatch } from "react-redux";
+import { Ionicons } from "@expo/vector-icons";
+import { store, AppDispatch } from "./src/store";
+import { loadFavorites } from "./src/store/slices/favoritesSlice";
 
 // Importation des écrans
-import EventsScreen from './src/screens/EventsScreen';
-import FavoritesScreen from './src/screens/FavoritesScreen';
-import SearchScreen from './src/screens/SearchScreen';
-import EventDetailScreen from './src/screens/EventDetailScreen';
+import EventsScreen from "./src/screens/EventsScreen";
+import FavoritesScreen from "./src/screens/FavoritesScreen";
+import SearchScreen from "./src/screens/SearchScreen";
+import EventDetailScreen from "./src/screens/EventDetailScreen";
 
 // Types
-import { RootStackParamList, MainTabParamList } from './src/types/navigation';
+import { RootStackParamList, MainTabParamList } from "./src/types/navigation";
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -26,35 +26,35 @@ function MainTabs() {
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarActiveTintColor: '#007AFF',
-        tabBarInactiveTintColor: '#666',
+        tabBarActiveTintColor: "#007AFF",
+        tabBarInactiveTintColor: "#666",
       }}
     >
-      <Tab.Screen 
-        name="Events" 
+      <Tab.Screen
+        name="Events"
         component={EventsScreen}
         options={{
-          title: 'Événements',
+          title: "Événements",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="calendar" size={size} color={color} />
           ),
         }}
       />
-      <Tab.Screen 
-        name="Search" 
+      <Tab.Screen
+        name="Search"
         component={SearchScreen}
         options={{
-          title: 'Recherche',
+          title: "Recherche",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="search" size={size} color={color} />
           ),
         }}
       />
-      <Tab.Screen 
-        name="Favorites" 
+      <Tab.Screen
+        name="Favorites"
         component={FavoritesScreen}
         options={{
-          title: 'Favoris',
+          title: "Favoris",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="heart" size={size} color={color} />
           ),
@@ -69,17 +69,17 @@ function AppNavigator() {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        <Stack.Screen 
-          name="MainTabs" 
+        <Stack.Screen
+          name="MainTabs"
           component={MainTabs}
           options={{ headerShown: false }}
         />
-        <Stack.Screen 
-          name="EventDetail" 
+        <Stack.Screen
+          name="EventDetail"
           component={EventDetailScreen}
           options={{
             title: "Détails de l'événement",
-            headerBackTitle: 'Retour',
+            headerBackTitle: "Retour",
           }}
         />
       </Stack.Navigator>
@@ -111,4 +111,3 @@ export default function App() {
     </Provider>
   );
 }
-

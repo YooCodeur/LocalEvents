@@ -136,4 +136,4 @@ export interface SearchParams {
   endDateTime?: string;
   size?: number;
   page?: number;
-} 
+}

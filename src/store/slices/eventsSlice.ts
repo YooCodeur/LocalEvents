@@ -1,5 +1,5 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { LocalEvent, SearchParams } from '../../types/api';
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { LocalEvent, SearchParams } from "../../types/api";
 
 // État initial
 interface EventsState {
@@ -16,7 +16,7 @@ const initialState: EventsState = {
   loading: false,
   error: null,
   searchParams: {
-    city: 'Paris',
+    city: "Paris",
     size: 20,
     page: 0,
   },
@@ -26,32 +26,36 @@ const initialState: EventsState = {
 
 // Actions asynchrones avec intégration API
 export const fetchEvents = createAsyncThunk(
-  'events/fetchEvents',
+  "events/fetchEvents",
   async (params: SearchParams, { rejectWithValue }) => {
     try {
-      const { EventsService } = await import('../../services');
+      const { EventsService } = await import("../../services");
       return await EventsService.getEventsByCity(params);
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Erreur lors du chargement des événements');
+    } catch (error: unknown) {
+      return rejectWithValue(
+        (error as Error).message || "Erreur lors du chargement des événements",
+      );
     }
-  }
+  },
 );
 
 export const searchEvents = createAsyncThunk(
-  'events/searchEvents',
+  "events/searchEvents",
   async (params: SearchParams, { rejectWithValue }) => {
     try {
-      const { EventsService } = await import('../../services');
+      const { EventsService } = await import("../../services");
       return await EventsService.searchEvents(params);
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Erreur lors de la recherche');
+    } catch (error: unknown) {
+      return rejectWithValue(
+        (error as Error).message || "Erreur lors de la recherche",
+      );
     }
-  }
+  },
 );
 
 // Slice
 export const eventsSlice = createSlice({
-  name: 'events',
+  name: "events",
   initialState,
   reducers: {
     setSearchParams: (state, action: PayloadAction<Partial<SearchParams>>) => {
@@ -85,7 +89,10 @@ export const eventsSlice = createSlice({
       })
       .addCase(fetchEvents.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string || action.error.message || 'Erreur lors du chargement des événements';
+        state.error =
+          (action.payload as string) ||
+          action.error.message ||
+          "Erreur lors du chargement des événements";
       })
       // searchEvents
       .addCase(searchEvents.pending, (state) => {
@@ -100,9 +107,12 @@ export const eventsSlice = createSlice({
       })
       .addCase(searchEvents.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string || action.error.message || 'Erreur lors de la recherche';
+        state.error =
+          (action.payload as string) ||
+          action.error.message ||
+          "Erreur lors de la recherche";
       });
   },
 });
 
-export const { setSearchParams, clearEvents, clearError } = eventsSlice.actions; 
+export const { setSearchParams, clearEvents, clearError } = eventsSlice.actions;

@@ -1,5 +1,5 @@
-import { NavigatorScreenParams } from '@react-navigation/native';
-import { LocalEvent } from './api';
+import { NavigatorScreenParams } from "@react-navigation/native";
+import { LocalEvent } from "./api";
 
 // Types pour les paramètres des écrans
 
@@ -20,11 +20,14 @@ export type MainTabParamList = {
 
 // Types pour les écrans individuels
 export type EventsScreenProps = {
-  navigation: any; // On typera plus précisément plus tard
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  navigation: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   route: any;
 };
 
 export type EventDetailScreenProps = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   navigation: any;
   route: {
     params: {
@@ -34,18 +37,24 @@ export type EventDetailScreenProps = {
 };
 
 export type FavoritesScreenProps = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   navigation: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   route: any;
 };
 
 export type SearchScreenProps = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   navigation: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   route: any;
 };
 
 // Déclaration pour le typage global de React Navigation
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace ReactNavigation {
+    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
     interface RootParamList extends RootStackParamList {}
   }
-} 
+}

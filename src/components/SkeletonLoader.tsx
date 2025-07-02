@@ -1,16 +1,16 @@
-import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, Animated } from 'react-native';
+import React, { useEffect, useRef } from "react";
+import { View, StyleSheet, Animated } from "react-native";
 
 interface SkeletonLoaderProps {
   height?: number;
   width?: string | number;
   borderRadius?: number;
-  style?: any;
+  style?: object;
 }
 
 export const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
   height = 20,
-  width = '100%',
+  width = "100%",
   borderRadius = 4,
   style,
 }) => {
@@ -29,7 +29,7 @@ export const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
           duration: 1000,
           useNativeDriver: false,
         }),
-      ])
+      ]),
     );
 
     animation.start();
@@ -39,7 +39,7 @@ export const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
 
   const backgroundColor = animatedValue.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#e9ecef', '#f8f9fa'],
+    outputRange: ["#e9ecef", "#f8f9fa"],
   });
 
   return (
@@ -63,9 +63,24 @@ export const EventSkeleton: React.FC = () => (
   <View style={styles.eventSkeletonCard}>
     <SkeletonLoader height={80} width={80} borderRadius={8} />
     <View style={styles.eventSkeletonInfo}>
-      <SkeletonLoader height={18} width="90%" borderRadius={4} style={{ marginBottom: 8 }} />
-      <SkeletonLoader height={14} width="70%" borderRadius={4} style={{ marginBottom: 6 }} />
-      <SkeletonLoader height={14} width="60%" borderRadius={4} style={{ marginBottom: 6 }} />
+      <SkeletonLoader
+        height={18}
+        width="90%"
+        borderRadius={4}
+        style={{ marginBottom: 8 }}
+      />
+      <SkeletonLoader
+        height={14}
+        width="70%"
+        borderRadius={4}
+        style={{ marginBottom: 6 }}
+      />
+      <SkeletonLoader
+        height={14}
+        width="60%"
+        borderRadius={4}
+        style={{ marginBottom: 6 }}
+      />
       <SkeletonLoader height={12} width="50%" borderRadius={4} />
     </View>
     <View style={styles.eventSkeletonFavorite}>
@@ -75,7 +90,9 @@ export const EventSkeleton: React.FC = () => (
 );
 
 // Composant pour liste de skeletons
-export const EventsSkeletonList: React.FC<{ count?: number }> = ({ count = 5 }) => (
+export const EventsSkeletonList: React.FC<{ count?: number }> = ({
+  count = 5,
+}) => (
   <View style={styles.skeletonList}>
     {Array.from({ length: count }).map((_, index) => (
       <View key={index}>
@@ -88,15 +105,15 @@ export const EventsSkeletonList: React.FC<{ count?: number }> = ({ count = 5 }) 
 
 const styles = StyleSheet.create({
   skeleton: {
-    backgroundColor: '#e9ecef',
+    backgroundColor: "#e9ecef",
   },
   eventSkeletonCard: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 12,
     padding: 16,
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    shadowColor: '#000',
+    flexDirection: "row",
+    alignItems: "flex-start",
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -118,4 +135,4 @@ const styles = StyleSheet.create({
   skeletonSeparator: {
     height: 12,
   },
-}); 
+});

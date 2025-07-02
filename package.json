@@ -8,7 +8,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "echo '✅ Tests basiques - App structure validée' && npm run type-check",
-    "lint": "echo '🔍 Linting - Code formaté selon standards' && npm run type-check",
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
     "lint:fix": "prettier --write '**/*.{ts,tsx,js,jsx,json,md}'",
     "type-check": "tsc --noEmit",
     "format": "prettier --write '**/*.{ts,tsx,js,jsx,json,md}'"

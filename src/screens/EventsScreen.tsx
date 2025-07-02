@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -7,20 +7,21 @@ import {
   Image,
   StyleSheet,
   RefreshControl,
-  ActivityIndicator,
-} from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigation } from '@react-navigation/native';
-import { RootState, AppDispatch } from '../store';
-import { fetchEvents, clearError } from '../store/slices/eventsSlice';
-import { LocalEvent } from '../types/api';
-import { EventsSkeletonList } from '../components/SkeletonLoader';
+} from "react-native";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigation } from "@react-navigation/native";
+import { RootState, AppDispatch } from "../store";
+import { fetchEvents, clearError } from "../store/slices/eventsSlice";
+import { LocalEvent } from "../types/api";
+import { EventsSkeletonList } from "../components/SkeletonLoader";
 
 export default function EventsScreen() {
   const dispatch = useDispatch<AppDispatch>();
   const navigation = useNavigation();
-  
-  const { events, loading, error, searchParams, hasMore } = useSelector((state: RootState) => state.events);
+
+  const { events, loading, error, searchParams } = useSelector(
+    (state: RootState) => state.events,
+  );
 
   // Charger les événements au démarrage
   useEffect(() => {
@@ -34,30 +35,46 @@ export default function EventsScreen() {
   }, [dispatch, searchParams]);
 
   // Naviguer vers le détail d'un événement
-  const handleEventPress = useCallback((event: LocalEvent) => {
-    navigation.navigate('EventDetail', { event });
-  }, [navigation]);
+  const handleEventPress = useCallback(
+    (event: LocalEvent) => {
+      navigation.navigate("EventDetail", { event });
+    },
+    [navigation],
+  );
 
-    // Rendu d'un événement
-  const renderEvent = useCallback(({ item }: { item: LocalEvent }) => (
-    <TouchableOpacity style={styles.eventCard} onPress={() => handleEventPress(item)}>
-      <Image source={{ uri: item.imageUrl }} style={styles.eventImage} />
-      <View style={styles.eventInfo}>
-        <Text style={styles.eventTitle} numberOfLines={2}>{item.name}</Text>
-        <Text style={styles.eventDate}>{item.date}</Text>
-        <View style={styles.eventLocation}>
-          <Text style={styles.eventVenue} numberOfLines={1}>{item.venue}</Text>
-          <Text style={styles.eventCity}>{item.city}</Text>
+  // Rendu d'un événement
+  const renderEvent = useCallback(
+    ({ item }: { item: LocalEvent }) => (
+      <TouchableOpacity
+        style={styles.eventCard}
+        onPress={() => handleEventPress(item)}
+      >
+        <Image source={{ uri: item.imageUrl }} style={styles.eventImage} />
+        <View style={styles.eventInfo}>
+          <Text style={styles.eventTitle} numberOfLines={2}>
+            {item.name}
+          </Text>
+          <Text style={styles.eventDate}>{item.date}</Text>
+          <View style={styles.eventLocation}>
+            <Text style={styles.eventVenue} numberOfLines={1}>
+              {item.venue}
+            </Text>
+            <Text style={styles.eventCity}>{item.city}</Text>
+          </View>
+          {item.priceRange && (
+            <Text style={styles.eventPrice}>{item.priceRange}</Text>
+          )}
         </View>
-        {item.priceRange && (
-          <Text style={styles.eventPrice}>{item.priceRange}</Text>
-        )}
-      </View>
-    </TouchableOpacity>
-  ), [handleEventPress]);
+      </TouchableOpacity>
+    ),
+    [handleEventPress],
+  );
 
   // Séparateur entre les événements
-  const ItemSeparator = useCallback(() => <View style={styles.separator} />, []);
+  const ItemSeparator = useCallback(
+    () => <View style={styles.separator} />,
+    [],
+  );
 
   // Écran de chargement initial avec skeleton
   if (loading && events.length === 0) {
@@ -106,7 +123,7 @@ export default function EventsScreen() {
           <RefreshControl
             refreshing={loading}
             onRefresh={onRefresh}
-            colors={['#007AFF']}
+            colors={["#007AFF"]}
             title="Actualisation..."
           />
         }
@@ -120,25 +137,25 @@ export default function EventsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: "#f8f9fa",
   },
   centerContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: "#f8f9fa",
   },
   listContainer: {
     padding: 16,
   },
   eventCard: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 12,
     padding: 16,
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    shadowColor: '#000',
+    flexDirection: "row",
+    alignItems: "flex-start",
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -151,7 +168,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 8,
-    backgroundColor: '#e9ecef',
+    backgroundColor: "#e9ecef",
   },
   eventInfo: {
     flex: 1,
@@ -159,14 +176,14 @@ const styles = StyleSheet.create({
   },
   eventTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#212529',
+    fontWeight: "600",
+    color: "#212529",
     marginBottom: 4,
   },
   eventDate: {
     fontSize: 14,
-    color: '#007AFF',
-    fontWeight: '500',
+    color: "#007AFF",
+    fontWeight: "500",
     marginBottom: 6,
   },
   eventLocation: {
@@ -174,17 +191,17 @@ const styles = StyleSheet.create({
   },
   eventVenue: {
     fontSize: 14,
-    color: '#495057',
-    fontWeight: '500',
+    color: "#495057",
+    fontWeight: "500",
   },
   eventCity: {
     fontSize: 12,
-    color: '#6c757d',
+    color: "#6c757d",
   },
   eventPrice: {
     fontSize: 14,
-    color: '#28a745',
-    fontWeight: '600',
+    color: "#28a745",
+    fontWeight: "600",
     marginTop: 4,
   },
   separator: {
@@ -193,37 +210,37 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    color: '#6c757d',
+    color: "#6c757d",
   },
   errorText: {
     fontSize: 16,
-    color: '#dc3545',
-    textAlign: 'center',
+    color: "#dc3545",
+    textAlign: "center",
     marginBottom: 20,
   },
   emptyText: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#495057',
-    textAlign: 'center',
+    fontWeight: "600",
+    color: "#495057",
+    textAlign: "center",
     marginBottom: 8,
   },
   emptySubtext: {
     fontSize: 14,
-    color: '#6c757d',
-    textAlign: 'center',
+    color: "#6c757d",
+    textAlign: "center",
     marginBottom: 20,
     paddingHorizontal: 20,
   },
   retryButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: "#007AFF",
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
   },
   retryButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
-}); 
+});
