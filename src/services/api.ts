@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Configuration depuis les variables d'environnement
-const TICKETMASTER_API_KEY = process.env.TICKETMASTER_API_KEY || 'qokDfAhYyqmNBFaHPK6Gox0uwAisUumP';
+const TICKETMASTER_API_KEY = process.env.TICKETMASTER_API_KEY ;
 const TICKETMASTER_BASE_URL = process.env.TICKETMASTER_BASE_URL || 'https://app.ticketmaster.com/discovery/v2';
 
 // Validation simple
