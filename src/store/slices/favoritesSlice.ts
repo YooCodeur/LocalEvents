@@ -2,6 +2,9 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LocalEvent } from '../../types/api';
 
+// Clé de stockage pour les favoris
+const FAVORITES_STORAGE_KEY = '@LocalEvents:favorites';
+
 // État initial
 interface FavoritesState {
   favorites: LocalEvent[];
@@ -14,8 +17,6 @@ const initialState: FavoritesState = {
   loading: false,
   error: null,
 };
-
-const FAVORITES_STORAGE_KEY = '@LocalEvents:favorites';
 
 // Actions asynchrones pour la persistance
 export const loadFavorites = createAsyncThunk(

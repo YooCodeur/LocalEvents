@@ -24,20 +24,28 @@ const initialState: EventsState = {
   page: 0,
 };
 
-// Actions asynchrones (on les implémentera plus tard)
+// Actions asynchrones avec intégration API
 export const fetchEvents = createAsyncThunk(
   'events/fetchEvents',
-  async (params: SearchParams) => {
-    // TODO: Implémenter l'appel API
-    return [] as LocalEvent[];
+  async (params: SearchParams, { rejectWithValue }) => {
+    try {
+      const { EventsService } = await import('../../services');
+      return await EventsService.getEventsByCity(params);
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Erreur lors du chargement des événements');
+    }
   }
 );
 
 export const searchEvents = createAsyncThunk(
   'events/searchEvents',
-  async (params: SearchParams) => {
-    // TODO: Implémenter la recherche
-    return [] as LocalEvent[];
+  async (params: SearchParams, { rejectWithValue }) => {
+    try {
+      const { EventsService } = await import('../../services');
+      return await EventsService.searchEvents(params);
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Erreur lors de la recherche');
+    }
   }
 );
 
@@ -77,7 +85,7 @@ export const eventsSlice = createSlice({
       })
       .addCase(fetchEvents.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || 'Erreur lors du chargement des événements';
+        state.error = action.payload as string || action.error.message || 'Erreur lors du chargement des événements';
       })
       // searchEvents
       .addCase(searchEvents.pending, (state) => {
@@ -92,7 +100,7 @@ export const eventsSlice = createSlice({
       })
       .addCase(searchEvents.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || 'Erreur lors de la recherche';
+        state.error = action.payload as string || action.error.message || 'Erreur lors de la recherche';
       });
   },
 });
