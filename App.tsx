@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Provider } from 'react-redux';
-import { store } from './src/store';
+import { Provider, useDispatch } from 'react-redux';
+import { store, AppDispatch } from './src/store';
+import { loadFavorites } from './src/store/slices/favoritesSlice';
 
 // Importation des écrans
 import EventsScreen from './src/screens/EventsScreen';
@@ -78,11 +79,27 @@ function AppNavigator() {
   );
 }
 
+// Composant interne qui charge les favoris au démarrage
+function AppContent() {
+  const dispatch = useDispatch<AppDispatch>();
+
+  useEffect(() => {
+    // Charger les favoris sauvegardés au démarrage de l'app
+    dispatch(loadFavorites());
+  }, [dispatch]);
+
+  return (
+    <>
+      <AppNavigator />
+      <StatusBar style="auto" />
+    </>
+  );
+}
+
 export default function App() {
   return (
     <Provider store={store}>
-      <AppNavigator />
-      <StatusBar style="auto" />
+      <AppContent />
     </Provider>
   );
 }
