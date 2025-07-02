@@ -1,14 +1,28 @@
 import axios from 'axios';
+import Constants from 'expo-constants';
 
-// Configuration depuis les variables d'environnement
-const TICKETMASTER_API_KEY = process.env.TICKETMASTER_API_KEY ;
-const TICKETMASTER_BASE_URL = process.env.TICKETMASTER_BASE_URL || 'https://app.ticketmaster.com/discovery/v2';
+// Configuration API depuis les variables d'environnement (.env)
+// Expo utilise le préfixe EXPO_PUBLIC_ pour les variables côté client
+const TICKETMASTER_API_KEY = 
+  process.env.EXPO_PUBLIC_TICKETMASTER_API_KEY || 
+  Constants.expoConfig?.extra?.TICKETMASTER_API_KEY;
 
-// Validation simple
+const TICKETMASTER_BASE_URL = 
+  process.env.EXPO_PUBLIC_TICKETMASTER_BASE_URL || 
+  Constants.expoConfig?.extra?.TICKETMASTER_BASE_URL || 
+  'https://app.ticketmaster.com/discovery/v2';
+
+// Validation avec debugging
+console.log('🔧 Debug variables environnement:');
+console.log('   process.env.EXPO_PUBLIC_TICKETMASTER_API_KEY:', process.env.EXPO_PUBLIC_TICKETMASTER_API_KEY ? '✅ Présente' : '❌ Manquante');
+console.log('   Constants.expoConfig.extra:', Constants.expoConfig?.extra ? '✅ Disponible' : '❌ Non disponible');
+
 if (TICKETMASTER_API_KEY && TICKETMASTER_API_KEY.length > 10) {
-  console.log('✅ API Ticketmaster configurée');
+  const maskedKey = TICKETMASTER_API_KEY.slice(0, 8) + '...' + TICKETMASTER_API_KEY.slice(-4);
+  console.log(`✅ API Ticketmaster configurée: ${maskedKey}`);
 } else {
   console.warn('⚠️ Clé API Ticketmaster manquante ou invalide');
+  console.warn('📋 Vérifiez votre fichier .env avec EXPO_PUBLIC_TICKETMASTER_API_KEY');
 }
 
 // Instance Axios configurée
