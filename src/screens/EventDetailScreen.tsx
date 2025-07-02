@@ -13,17 +13,43 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { EventDetailScreenProps } from '../types/navigation';
 import { RootState, AppDispatch } from '../store';
-import { toggleFavorite } from '../store/slices/favoritesSlice';
+import { toggleFavoriteAsync } from '../store/slices/favoritesSlice';
+import { LocalEvent } from '../types/api';
+
+// Interface pour l'état des favoris
+interface FavoritesState {
+  favorites: LocalEvent[];
+  loading: boolean;
+  error: string | null;
+}
 
 export default function EventDetailScreen({ route, navigation }: EventDetailScreenProps) {
   const { event } = route.params;
   const dispatch = useDispatch<AppDispatch>();
   
-  const { favorites, loading } = useSelector((state: RootState) => state.favorites);
+  const favoritesState = useSelector((state: RootState) => state.favorites) as FavoritesState;
+  const { favorites, loading, error } = favoritesState;
   const [imageLoading, setImageLoading] = useState(true);
 
-  // Vérifier si l'événement est dans les favoris
-  const isFavorite = favorites.some((fav: any) => fav.id === event.id);
+  // État local pour mise à jour immédiate de l'interface
+  const isInReduxFavorites = favorites.some((fav: any) => fav.id === event.id);
+  const [localIsFavorite, setLocalIsFavorite] = useState(isInReduxFavorites);
+
+  // Synchroniser l'état local avec Redux
+  useEffect(() => {
+    setLocalIsFavorite(isInReduxFavorites);
+  }, [isInReduxFavorites]);
+
+  // Gestion d'erreur : remettre l'état local en cas d'échec
+  useEffect(() => {
+    if (error) {
+      setLocalIsFavorite(isInReduxFavorites);
+      Alert.alert('Erreur', 'Impossible de modifier le favori. Veuillez réessayer.');
+    }
+  }, [error, isInReduxFavorites]);
+
+  // Utiliser l'état local pour l'affichage
+  const isFavorite = localIsFavorite;
 
   // Mise à jour du titre de navigation
   useEffect(() => {
@@ -34,8 +60,11 @@ export default function EventDetailScreen({ route, navigation }: EventDetailScre
 
   // Gestion des favoris
   const handleToggleFavorite = () => {
-    const eventWithFavoriteStatus = { ...event, isFavorite };
-    dispatch(toggleFavorite(eventWithFavoriteStatus));
+    // Mise à jour immédiate de l'interface pour UX optimiste
+    setLocalIsFavorite(!localIsFavorite);
+    
+    // Dispatch de l'action asynchrone pour persistance
+    dispatch(toggleFavoriteAsync(event));
   };
 
   // Ouvrir le lien externe
@@ -128,7 +157,7 @@ export default function EventDetailScreen({ route, navigation }: EventDetailScre
             disabled={loading}
           >
             <Text style={styles.actionButtonText}>
-              {loading ? 'Sauvegarde...' : isFavorite ? '❤️ Retirer des favoris' : '🤍 Ajouter aux favoris'}
+              {loading ? 'Sauvegarde...' : isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
             </Text>
           </TouchableOpacity>
 
@@ -138,7 +167,7 @@ export default function EventDetailScreen({ route, navigation }: EventDetailScre
               style={[styles.actionButton, styles.linkButton]}
               onPress={handleOpenUrl}
             >
-              <Text style={styles.actionButtonText}>🔗 Voir sur Ticketmaster</Text>
+              <Text style={styles.actionButtonText}> Voir sur Ticketmaster</Text>
             </TouchableOpacity>
           )}
         </View>

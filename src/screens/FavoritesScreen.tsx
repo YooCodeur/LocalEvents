@@ -12,14 +12,22 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { RootState, AppDispatch } from '../store';
-import { loadFavorites, removeFavorite, clearError } from '../store/slices/favoritesSlice';
+import { loadFavorites, removeFavoriteAsync, clearError } from '../store/slices/favoritesSlice';
 import { LocalEvent } from '../types/api';
+
+// Interface pour l'état des favoris
+interface FavoritesState {
+  favorites: LocalEvent[];
+  loading: boolean;
+  error: string | null;
+}
 
 export default function FavoritesScreen() {
   const dispatch = useDispatch<AppDispatch>();
   const navigation = useNavigation();
   
-  const { favorites, loading, error } = useSelector((state: RootState) => state.favorites);
+  const favoritesState = useSelector((state: RootState) => state.favorites) as FavoritesState;
+  const { favorites, loading, error } = favoritesState;
 
   // Charger les favoris au démarrage et quand l'écran redevient actif
   useEffect(() => {
@@ -51,7 +59,7 @@ export default function FavoritesScreen() {
         {
           text: 'Retirer',
           style: 'destructive',
-          onPress: () => dispatch(removeFavorite(event.id)),
+          onPress: () => dispatch(removeFavoriteAsync(event.id)),
         },
       ],
       { cancelable: true }
