@@ -14,6 +14,7 @@ import { useNavigation } from '@react-navigation/native';
 import { RootState, AppDispatch } from '../store';
 import { fetchEvents, clearError } from '../store/slices/eventsSlice';
 import { LocalEvent } from '../types/api';
+import { EventsSkeletonList } from '../components/SkeletonLoader';
 
 export default function EventsScreen() {
   const dispatch = useDispatch<AppDispatch>();
@@ -37,7 +38,7 @@ export default function EventsScreen() {
     navigation.navigate('EventDetail', { event });
   }, [navigation]);
 
-  // Rendu d'un événement
+    // Rendu d'un événement
   const renderEvent = useCallback(({ item }: { item: LocalEvent }) => (
     <TouchableOpacity style={styles.eventCard} onPress={() => handleEventPress(item)}>
       <Image source={{ uri: item.imageUrl }} style={styles.eventImage} />
@@ -52,21 +53,17 @@ export default function EventsScreen() {
           <Text style={styles.eventPrice}>{item.priceRange}</Text>
         )}
       </View>
-      <View style={styles.favoriteIcon}>
-        <Text>{item.isFavorite ? '❤️' : '🤍'}</Text>
-      </View>
     </TouchableOpacity>
   ), [handleEventPress]);
 
   // Séparateur entre les événements
   const ItemSeparator = useCallback(() => <View style={styles.separator} />, []);
 
-  // Écran de chargement initial
+  // Écran de chargement initial avec skeleton
   if (loading && events.length === 0) {
     return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
-        <Text style={styles.loadingText}>Chargement des événements...</Text>
+      <View style={styles.container}>
+        <EventsSkeletonList count={6} />
       </View>
     );
   }
@@ -189,9 +186,6 @@ const styles = StyleSheet.create({
     color: '#28a745',
     fontWeight: '600',
     marginTop: 4,
-  },
-  favoriteIcon: {
-    padding: 8,
   },
   separator: {
     height: 12,
