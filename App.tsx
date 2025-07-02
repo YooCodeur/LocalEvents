@@ -13,6 +13,7 @@ import { loadFavorites } from "./src/store/slices/favoritesSlice";
 import EventsScreen from "./src/screens/EventsScreen";
 import FavoritesScreen from "./src/screens/FavoritesScreen";
 import SearchScreen from "./src/screens/SearchScreen";
+import CameraScreen from "./src/screens/CameraScreen";
 import EventDetailScreen from "./src/screens/EventDetailScreen";
 
 // Types
@@ -47,6 +48,16 @@ function MainTabs() {
           title: "Recherche",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="search" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Camera"
+        component={CameraScreen}
+        options={{
+          title: "Caméra",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="camera" size={size} color={color} />
           ),
         }}
       />

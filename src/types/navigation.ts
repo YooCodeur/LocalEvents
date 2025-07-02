@@ -16,6 +16,7 @@ export type MainTabParamList = {
   Events: undefined;
   Favorites: undefined;
   Search: undefined;
+  Camera: undefined;
 };
 
 // Types pour les écrans individuels
@@ -44,6 +45,13 @@ export type FavoritesScreenProps = {
 };
 
 export type SearchScreenProps = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  navigation: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  route: any;
+};
+
+export type CameraScreenProps = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   navigation: any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
