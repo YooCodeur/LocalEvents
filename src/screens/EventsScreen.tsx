@@ -208,7 +208,7 @@ export default function EventsScreen() {
       <FlatList
         data={events}
         renderItem={renderEvent}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) => `${item.id}-${index}`}
         ItemSeparatorComponent={ItemSeparator}
         ListHeaderComponent={
           <>

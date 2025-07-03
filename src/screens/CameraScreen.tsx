@@ -227,7 +227,7 @@ const CameraScreen = () => {
               <FlatList
                 data={capturedPhotos}
                 renderItem={renderPhoto}
-                keyExtractor={(item) => item.id}
+                keyExtractor={(item, index) => `${item.id}-${index}`}
                 numColumns={2}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.photoGrid}

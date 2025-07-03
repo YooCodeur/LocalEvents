@@ -214,7 +214,7 @@ export default function FavoritesScreen() {
       <FlatList
         data={favorites}
         renderItem={renderFavorite}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) => `${item.id}-${index}`}
         ItemSeparatorComponent={ItemSeparator}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}

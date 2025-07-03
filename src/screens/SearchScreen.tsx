@@ -611,7 +611,7 @@ const styles = StyleSheet.create({
 
   section: {
     backgroundColor: "#fff",
-    borderRadius: 16,
+    borderRadius: 12,
     padding: 20,
     marginBottom: 20,
     marginHorizontal: 20,

@@ -6,6 +6,18 @@ import { ImageCacheService } from "../../services/imageCacheService";
 // Clé de stockage pour les favoris
 const FAVORITES_STORAGE_KEY = "@LocalEvents:favorites";
 
+// Fonction utilitaire pour déduplication des favoris
+const deduplicateFavorites = (favorites: LocalEvent[]): LocalEvent[] => {
+  const seen = new Set<string>();
+  return favorites.filter((event) => {
+    if (seen.has(event.id)) {
+      return false;
+    }
+    seen.add(event.id);
+    return true;
+  });
+};
+
 // État initial
 export interface FavoritesState {
   favorites: LocalEvent[];
@@ -187,8 +199,8 @@ export const favoritesSlice = createSlice({
       );
 
       if (existingIndex === -1) {
-        event.isFavorite = true;
-        state.favorites.push(event);
+        const newEvent = { ...event, isFavorite: true };
+        state.favorites.push(newEvent);
       }
     },
     removeFavorite: (state, action: PayloadAction<string>) => {
@@ -205,9 +217,14 @@ export const favoritesSlice = createSlice({
         // Retirer des favoris
         state.favorites.splice(existingIndex, 1);
       } else {
-        // Ajouter aux favoris
-        event.isFavorite = true;
-        state.favorites.push(event);
+        // Ajouter aux favoris uniquement s'il n'existe pas déjà
+        const alreadyExists = state.favorites.some(
+          (fav) => fav.id === event.id,
+        );
+        if (!alreadyExists) {
+          const newEvent = { ...event, isFavorite: true };
+          state.favorites.push(newEvent);
+        }
       }
     },
     clearFavorites: (state) => {
@@ -226,10 +243,12 @@ export const favoritesSlice = createSlice({
       })
       .addCase(loadFavorites.fulfilled, (state, action) => {
         state.loading = false;
-        state.favorites = action.payload.map((fav: LocalEvent) => ({
+        // Déduplication des favoris avant de les assigner
+        const favoritesWithFlag = action.payload.map((fav: LocalEvent) => ({
           ...fav,
           isFavorite: true,
         }));
+        state.favorites = deduplicateFavorites(favoritesWithFlag);
       })
       .addCase(loadFavorites.rejected, (state, action) => {
         state.loading = false;
@@ -254,7 +273,13 @@ export const favoritesSlice = createSlice({
       .addCase(addFavoriteAsync.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload) {
-          state.favorites.push(action.payload);
+          // Vérifier si l'événement n'existe pas déjà avant de l'ajouter
+          const existingIndex = state.favorites.findIndex(
+            (fav) => fav.id === action.payload!.id,
+          );
+          if (existingIndex === -1) {
+            state.favorites.push(action.payload);
+          }
         }
       })
       .addCase(addFavoriteAsync.rejected, (state, action) => {
@@ -288,8 +313,14 @@ export const favoritesSlice = createSlice({
         const { event, action: toggleAction } = action.payload;
 
         if (toggleAction === "add") {
-          const newEvent = { ...event, isFavorite: true };
-          state.favorites.push(newEvent);
+          // Vérifier si l'événement n'existe pas déjà avant de l'ajouter
+          const existingIndex = state.favorites.findIndex(
+            (fav) => fav.id === event.id,
+          );
+          if (existingIndex === -1) {
+            const newEvent = { ...event, isFavorite: true };
+            state.favorites.push(newEvent);
+          }
         } else {
           state.favorites = state.favorites.filter(
             (fav) => fav.id !== event.id,
