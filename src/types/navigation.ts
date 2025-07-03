@@ -1,4 +1,7 @@
 import { NavigatorScreenParams } from "@react-navigation/native";
+import { StackScreenProps } from "@react-navigation/stack";
+import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
+import { CompositeScreenProps } from "@react-navigation/native";
 import { LocalEvent } from "./api";
 
 // Types pour les paramètres des écrans
@@ -19,44 +22,32 @@ export type MainTabParamList = {
   Camera: undefined;
 };
 
-// Types pour les écrans individuels
-export type EventsScreenProps = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  navigation: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  route: any;
-};
+// Types pour les écrans individuels avec navigation typée
 
-export type EventDetailScreenProps = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  navigation: any;
-  route: {
-    params: {
-      event: LocalEvent;
-    };
-  };
-};
+export type EventsScreenProps = BottomTabScreenProps<
+  MainTabParamList,
+  "Events"
+>;
 
-export type FavoritesScreenProps = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  navigation: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  route: any;
-};
+export type EventDetailScreenProps = StackScreenProps<
+  RootStackParamList,
+  "EventDetail"
+>;
 
-export type SearchScreenProps = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  navigation: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  route: any;
-};
+export type FavoritesScreenProps = BottomTabScreenProps<
+  MainTabParamList,
+  "Favorites"
+>;
 
-export type CameraScreenProps = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  navigation: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  route: any;
-};
+export type SearchScreenProps = CompositeScreenProps<
+  BottomTabScreenProps<MainTabParamList, "Search">,
+  StackScreenProps<RootStackParamList>
+>;
+
+export type CameraScreenProps = BottomTabScreenProps<
+  MainTabParamList,
+  "Camera"
+>;
 
 // Déclaration pour le typage global de React Navigation
 declare global {
