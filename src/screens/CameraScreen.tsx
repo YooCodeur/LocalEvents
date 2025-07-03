@@ -7,13 +7,14 @@ import {
   Alert,
   Image,
   SafeAreaView,
-  Platform,
   FlatList,
   Dimensions,
+  Modal,
 } from "react-native";
 import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
-import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
+
+const { width } = Dimensions.get("window");
 
 interface CapturedPhoto {
   id: string;
@@ -21,51 +22,38 @@ interface CapturedPhoto {
   timestamp: number;
 }
 
-export default function CameraScreen() {
+const CameraScreen = () => {
   const [facing, setFacing] = useState<CameraType>("back");
   const [permission, requestPermission] = useCameraPermissions();
   const [capturedPhotos, setCapturedPhotos] = useState<CapturedPhoto[]>([]);
-  const [showCamera, setShowCamera] = useState(false);
+  const [showGallery, setShowGallery] = useState(false);
   const cameraRef = useRef<CameraView>(null);
 
   useEffect(() => {
-    requestCameraPermission();
-  }, []);
-
-  const requestCameraPermission = async () => {
-    if (!permission?.granted) {
-      const result = await requestPermission();
-      if (!result.granted) {
-        Alert.alert(
-          "Permission refusée",
-          "L'accès à la caméra est nécessaire pour prendre des photos.",
-          [{ text: "OK" }]
-        );
-      }
+    if (permission && !permission.granted && permission.canAskAgain) {
+      requestPermission();
     }
-  };
+  }, [permission]);
 
   const toggleCameraFacing = () => {
     setFacing((current) => (current === "back" ? "front" : "back"));
   };
 
-  const takePicture = async () => {
+  const takePhoto = async () => {
     if (cameraRef.current) {
       try {
         const photo = await cameraRef.current.takePictureAsync({
           quality: 0.8,
-          base64: false,
         });
-        
-        if (photo?.uri) {
+
+        if (photo) {
           const newPhoto: CapturedPhoto = {
             id: Date.now().toString(),
             uri: photo.uri,
             timestamp: Date.now(),
           };
-          
-          setCapturedPhotos(prev => [newPhoto, ...prev]);
-          setShowCamera(false);
+
+          setCapturedPhotos((prev) => [newPhoto, ...prev]);
         }
       } catch (error) {
         console.error("Erreur lors de la prise de photo:", error);
@@ -74,456 +62,451 @@ export default function CameraScreen() {
     }
   };
 
-  const pickImageFromGallery = async () => {
-    try {
-      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      
-      if (!permissionResult.granted) {
-        Alert.alert(
-          "Permission requise",
-          "L'accès à la galerie est nécessaire pour sélectionner une photo."
-        );
-        return;
-      }
-
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 0.8,
-      });
-
-      if (!result.canceled && result.assets[0]) {
-        const newPhoto: CapturedPhoto = {
-          id: Date.now().toString(),
-          uri: result.assets[0].uri,
-          timestamp: Date.now(),
-        };
-        
-        setCapturedPhotos(prev => [newPhoto, ...prev]);
-      }
-    } catch (error) {
-      console.error("Erreur lors de la sélection d'image:", error);
-      Alert.alert("Erreur", "Impossible de sélectionner l'image");
-    }
-  };
-
-  const openCamera = () => {
-    if (permission?.granted) {
-      setShowCamera(true);
-    } else {
-      requestCameraPermission();
-    }
-  };
-
-  const deletePhoto = (photoId: string) => {
-    setCapturedPhotos(prev => prev.filter(photo => photo.id !== photoId));
-  };
-
-  const clearAllPhotos = () => {
+  const deletePhoto = (id: string) => {
     Alert.alert(
-      "Supprimer toutes les photos",
-      "Êtes-vous sûr de vouloir supprimer toutes les photos ?",
+      "Supprimer la photo",
+      "Êtes-vous sûr de vouloir supprimer cette photo ?",
       [
         { text: "Annuler", style: "cancel" },
-        { 
-          text: "Supprimer", 
+        {
+          text: "Supprimer",
           style: "destructive",
-          onPress: () => setCapturedPhotos([])
-        }
-      ]
+          onPress: () =>
+            setCapturedPhotos((prev) =>
+              prev.filter((photo) => photo.id !== id),
+            ),
+        },
+      ],
     );
   };
 
-  const formatDate = (timestamp: number) => {
-    const date = new Date(timestamp);
-    return date.toLocaleTimeString('fr-FR', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    });
+  const deleteAllPhotos = () => {
+    if (capturedPhotos.length === 0) return;
+
+    Alert.alert(
+      "Supprimer toutes les photos",
+      `Êtes-vous sûr de vouloir supprimer les ${capturedPhotos.length} photos ?`,
+      [
+        { text: "Annuler", style: "cancel" },
+        {
+          text: "Tout supprimer",
+          style: "destructive",
+          onPress: () => setCapturedPhotos([]),
+        },
+      ],
+    );
   };
 
-  const renderPhoto = ({ item }: { item: CapturedPhoto }) => {
-    const screenWidth = Dimensions.get('window').width;
-    const photoWidth = (screenWidth - 48) / 2; // 2 colonnes avec marges
-    
-    return (
-      <View style={[styles.photoItem, { width: photoWidth }]}>
-        <Image source={{ uri: item.uri }} style={styles.galleryPhoto} />
-        <View style={styles.photoOverlay}>
-          <Text style={styles.photoTime}>{formatDate(item.timestamp)}</Text>
-          <TouchableOpacity
-            style={styles.deletePhotoButton}
-            onPress={() => deletePhoto(item.id)}
-          >
-            <Ionicons name="trash" size={16} color="white" />
-          </TouchableOpacity>
-        </View>
+  const renderPhoto = ({ item }: { item: CapturedPhoto }) => (
+    <View style={styles.photoContainer}>
+      <View style={styles.imageContainer}>
+        <Image source={{ uri: item.uri }} style={styles.photo} />
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={() => deletePhoto(item.id)}
+        >
+          <Ionicons name="close-circle" size={24} color="#FF3B30" />
+        </TouchableOpacity>
       </View>
-    );
-  };
+      <Text style={styles.timestamp}>
+        {new Date(item.timestamp).toLocaleTimeString()}
+      </Text>
+    </View>
+  );
 
   if (!permission) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.centerContainer}>
-          <Ionicons name="camera-outline" size={64} color="#666" />
-          <Text style={styles.loadingText}>Chargement de la caméra...</Text>
-        </View>
-      </SafeAreaView>
+      <View style={styles.container}>
+        <Text>Chargement...</Text>
+      </View>
     );
   }
 
   if (!permission.granted) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.centerContainer}>
-          <Ionicons name="camera-outline" size={64} color="#666" />
-          <Text style={styles.permissionText}>
-            Permission d'accès à la caméra requise
-          </Text>
-          <TouchableOpacity
-            style={styles.permissionButton}
-            onPress={requestCameraPermission}
-          >
-            <Text style={styles.permissionButtonText}>
-              Demander la permission
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
-  if (showCamera) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <CameraView
-          ref={cameraRef}
-          style={styles.camera}
-          facing={facing}
-        >
-          <View style={styles.cameraControls}>
-            <TouchableOpacity
-              style={styles.controlButton}
-              onPress={() => setShowCamera(false)}
-            >
-              <Ionicons name="close" size={30} color="white" />
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={styles.controlButton}
-              onPress={toggleCameraFacing}
-            >
-              <Ionicons name="camera-reverse" size={30} color="white" />
-            </TouchableOpacity>
-          </View>
-          
-          <View style={styles.captureContainer}>
-            <TouchableOpacity
-              style={styles.captureButton}
-              onPress={takePicture}
-            >
-              <View style={styles.captureButtonInner} />
-            </TouchableOpacity>
-          </View>
-        </CameraView>
-      </SafeAreaView>
+      <View style={styles.container}>
+        <Text style={styles.message}>
+          Nous avons besoin de votre permission pour utiliser la caméra
+        </Text>
+        <TouchableOpacity style={styles.button} onPress={requestPermission}>
+          <Text style={styles.buttonText}>Autoriser la caméra</Text>
+        </TouchableOpacity>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>📸 Galerie Photos</Text>
-        
-        {capturedPhotos.length > 0 ? (
-          <View style={styles.galleryContainer}>
-            <Text style={styles.photoCount}>
-              {capturedPhotos.length} photo{capturedPhotos.length > 1 ? 's' : ''}
-            </Text>
-            <FlatList
-              data={capturedPhotos}
-              renderItem={renderPhoto}
-              keyExtractor={(item) => item.id}
-              numColumns={2}
-              columnWrapperStyle={styles.photoRow}
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.galleryList}
-            />
-          </View>
-        ) : (
-          <View style={styles.placeholderContainer}>
-            <Ionicons name="image-outline" size={100} color="#ccc" />
-            <Text style={styles.placeholderText}>
-              Aucune photo dans la galerie
-            </Text>
-            <Text style={styles.placeholderSubtext}>
-              Commencez par prendre une photo !
-            </Text>
-          </View>
-        )}
+    <View style={styles.container}>
+      {/* Caméra PLEIN ÉCRAN */}
+      <CameraView ref={cameraRef} style={styles.camera} facing={facing} />
 
-        <View style={styles.buttonsContainer}>
+      {/* Overlay avec contrôles */}
+      <View style={styles.overlay}>
+        {/* Header avec compteur et bouton galerie */}
+        <SafeAreaView style={styles.header}>
           <TouchableOpacity
-            style={[styles.mainButton, styles.cameraButton]}
-            onPress={openCamera}
-          >
-            <Ionicons name="camera" size={24} color="white" />
-            <Text style={styles.mainButtonText}>Prendre une photo</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.mainButton, styles.galleryButton]}
-            onPress={pickImageFromGallery}
+            style={styles.galleryButton}
+            onPress={() => setShowGallery(true)}
           >
             <Ionicons name="images" size={24} color="white" />
-            <Text style={styles.mainButtonText}>Choisir de la galerie</Text>
+            {capturedPhotos.length > 0 && (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>{capturedPhotos.length}</Text>
+              </View>
+            )}
           </TouchableOpacity>
 
-          {capturedPhotos.length > 0 && (
-            <TouchableOpacity
-              style={[styles.mainButton, styles.deleteAllButton]}
-              onPress={clearAllPhotos}
-            >
-              <Ionicons name="trash" size={24} color="white" />
-              <Text style={styles.mainButtonText}>Tout supprimer</Text>
+          <Text style={styles.photoCount}>
+            📸 {capturedPhotos.length} photo
+            {capturedPhotos.length !== 1 ? "s" : ""}
+          </Text>
+        </SafeAreaView>
+
+        {/* Contrôles caméra en bas */}
+        <SafeAreaView style={styles.bottomControls}>
+          <View style={styles.controls}>
+            {/* Bouton de capture centré */}
+            <TouchableOpacity style={styles.captureButton} onPress={takePhoto}>
+              <View style={styles.captureButtonInner} />
             </TouchableOpacity>
-          )}
-        </View>
+
+            {/* Bouton flip caméra à droite */}
+            <TouchableOpacity
+              style={styles.controlButton}
+              onPress={toggleCameraFacing}
+            >
+              <Ionicons name="camera-reverse" size={28} color="white" />
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
       </View>
-    </SafeAreaView>
+
+      {/* Modal Galerie */}
+      <Modal
+        visible={showGallery}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
+        <SafeAreaView style={styles.galleryModal}>
+          <View style={styles.galleryHeader}>
+            <TouchableOpacity onPress={() => setShowGallery(false)}>
+              <Ionicons name="close" size={28} color="#333" />
+            </TouchableOpacity>
+
+            <View style={styles.titleContainer}>
+              <Text style={styles.galleryTitle}>Photos capturées</Text>
+            </View>
+          </View>
+
+          {capturedPhotos.length > 0 ? (
+            <>
+              <FlatList
+                data={capturedPhotos}
+                renderItem={renderPhoto}
+                keyExtractor={(item) => item.id}
+                numColumns={2}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.photoGrid}
+              />
+
+              {/* Footer avec bouton supprimer */}
+              <View style={styles.galleryFooter}>
+                <TouchableOpacity
+                  style={styles.deleteAllButtonBottom}
+                  onPress={deleteAllPhotos}
+                >
+                  <Text style={styles.deleteAllButtonText}>Tout supprimer</Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          ) : (
+            <View style={styles.emptyGallery}>
+              <Ionicons name="camera-outline" size={80} color="#ccc" />
+              <Text style={styles.emptyText}>Aucune photo</Text>
+              <Text style={styles.emptySubtext}>
+                Prenez une photo pour commencer
+              </Text>
+            </View>
+          )}
+        </SafeAreaView>
+      </Modal>
+    </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f9fa",
-  },
-  centerContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  content: {
-    flex: 1,
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "#212529",
-    marginBottom: 20,
-  },
-  loadingText: {
-    fontSize: 16,
-    color: "#666",
-    marginTop: 16,
-    textAlign: "center",
-  },
-  permissionText: {
-    fontSize: 16,
-    color: "#666",
-    marginTop: 16,
-    textAlign: "center",
-    marginBottom: 20,
-  },
-  permissionButton: {
-    backgroundColor: "#007AFF",
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  permissionButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "500",
+    backgroundColor: "#000",
   },
   camera: {
     flex: 1,
+    width: "100%",
+    height: "100%",
   },
-  cameraControls: {
-    position: "absolute",
-    top: Platform.OS === "ios" ? 60 : 40,
-    left: 0,
-    right: 0,
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: "space-between",
+  },
+  header: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 20,
-    zIndex: 1,
+    paddingTop: 20,
+    paddingRight: 20,
+    paddingBottom: 15,
   },
-  controlButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  galleryButton: {
+    width: 55,
+    height: 55,
+    borderRadius: 27.5,
+    backgroundColor: "rgba(0,0,0,0.6)",
     justifyContent: "center",
     alignItems: "center",
+    position: "relative",
+    marginLeft: 20,
+    marginTop: 20,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
   },
-  captureContainer: {
+  badge: {
     position: "absolute",
-    bottom: 50,
-    left: 0,
-    right: 0,
-    alignItems: "center",
-  },
-  captureButton: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "rgba(255, 255, 255, 0.3)",
+    top: -8,
+    right: -8,
+    backgroundColor: "#FF3B30",
+    borderRadius: 12,
+    minWidth: 24,
+    height: 24,
     justifyContent: "center",
     alignItems: "center",
-    borderWidth: 3,
+    borderWidth: 2,
     borderColor: "white",
   },
+  badgeText: {
+    color: "white",
+    fontSize: 11,
+    fontWeight: "bold",
+  },
+  photoCount: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
+    backgroundColor: "rgba(0,0,0,0.6)",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginRight: 20,
+    marginTop: 20,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  bottomControls: {
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+  },
+  controls: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    position: "relative",
+  },
+  captureButton: {
+    width: 85,
+    height: 85,
+    borderRadius: 42.5,
+    backgroundColor: "rgba(255,255,255,0.3)",
+    borderWidth: 6,
+    borderColor: "white",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 40,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
   captureButtonInner: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 65,
+    height: 65,
+    borderRadius: 32.5,
     backgroundColor: "white",
   },
-  imageContainer: {
+  controlButton: {
+    width: 55,
+    height: 55,
+    borderRadius: 27.5,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "center",
+    alignItems: "center",
+    position: "absolute",
+    right: 40,
+    bottom: 40,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+
+  // Modal Galerie
+  galleryModal: {
     flex: 1,
-    alignItems: "center",
-    marginBottom: 20,
+    backgroundColor: "#f8f9fa",
   },
-  capturedImage: {
-    width: "100%",
-    height: 300,
-    borderRadius: 12,
-    resizeMode: "cover",
-    marginBottom: 20,
-  },
-  imageActions: {
+  galleryHeader: {
     flexDirection: "row",
-    gap: 12,
-  },
-  actionButton: {
-    flexDirection: "row",
+    justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
-    gap: 8,
+    paddingHorizontal: 30,
+    paddingVertical: 22,
+    borderBottomWidth: 1,
+    borderBottomColor: "#e0e0e0",
+    backgroundColor: "white",
   },
-  retakeButton: {
-    backgroundColor: "#007AFF",
+  galleryTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
   },
-  deleteButton: {
-    backgroundColor: "#FF3B30",
-  },
-  actionButtonText: {
-    color: "white",
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  placeholderContainer: {
+  titleContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 20,
   },
-  placeholderText: {
-    fontSize: 16,
-    color: "#666",
-    marginTop: 16,
-    textAlign: "center",
+  galleryFooter: {
+    paddingHorizontal: 30,
+    paddingTop: 18,
+    paddingBottom: 25,
+    borderTopWidth: 1,
+    borderTopColor: "#e0e0e0",
+    backgroundColor: "white",
   },
-  placeholderSubtext: {
-    fontSize: 14,
-    color: "#999",
-    marginTop: 8,
-    textAlign: "center",
+  photoGrid: {
+    paddingHorizontal: 20,
+    paddingTop: 18,
+    paddingBottom: 22,
   },
-
-  galleryContainer: {
+  photoContainer: {
     flex: 1,
-    marginBottom: 20,
-  },
-  photoCount: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#212529",
-    marginBottom: 12,
-    textAlign: "center",
-  },
-  galleryList: {
-    paddingBottom: 10,
-  },
-  photoRow: {
-    justifyContent: "space-between",
-    marginBottom: 12,
-  },
-  photoItem: {
-    borderRadius: 12,
-    overflow: "hidden",
-    backgroundColor: "#fff",
+    margin: 10,
+    alignItems: "center",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
     },
     shadowOpacity: 0.1,
-    shadowRadius: 3.84,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  imageContainer: {
+    width: (width - 60) / 2,
+    height: (width - 60) / 2,
+    position: "relative",
+  },
+  photo: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 12,
+  },
+  deleteButton: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    backgroundColor: "rgba(255,255,255,0.95)",
+    borderRadius: 15,
+    padding: 2,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 3,
+  },
+  timestamp: {
+    textAlign: "center",
+    fontSize: 12,
+    color: "#666",
+    marginTop: 6,
+    fontWeight: "500",
+  },
+  emptyGallery: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 40,
+  },
+  emptyText: {
+    fontSize: 18,
+    color: "#666",
+    marginTop: 15,
+    fontWeight: "600",
+    textAlign: "center",
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: "#999",
+    marginTop: 8,
+    textAlign: "center",
+  },
+
+  // Permissions
+  message: {
+    textAlign: "center",
+    paddingBottom: 15,
+    paddingHorizontal: 30,
+    color: "white",
+    fontSize: 16,
+    lineHeight: 24,
+  },
+  button: {
+    backgroundColor: "#007AFF",
+    paddingHorizontal: 25,
+    paddingVertical: 15,
+    borderRadius: 12,
+    alignSelf: "center",
+    marginHorizontal: 30,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
     elevation: 5,
   },
-  galleryPhoto: {
-    width: "100%",
-    height: 120,
-    resizeMode: "cover",
-  },
-  photoOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
-    justifyContent: "space-between",
-    padding: 8,
-  },
-  photoTime: {
-    color: "white",
-    fontSize: 12,
-    fontWeight: "500",
-    textAlign: "right",
-  },
-  deletePhotoButton: {
-    alignSelf: "flex-end",
-    backgroundColor: "rgba(255, 59, 48, 0.8)",
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  buttonsContainer: {
-    gap: 12,
-  },
-  mainButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 16,
-    borderRadius: 12,
-    gap: 10,
-  },
-  cameraButton: {
-    backgroundColor: "#007AFF",
-  },
-  galleryButton: {
-    backgroundColor: "#34C759",
-  },
-  deleteAllButton: {
-    backgroundColor: "#FF3B30",
-  },
-  mainButtonText: {
+  buttonText: {
     color: "white",
     fontSize: 16,
     fontWeight: "600",
   },
-}); 
+  deleteAllButtonBottom: {
+    backgroundColor: "#FF3B30",
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    borderRadius: 12,
+    alignSelf: "center",
+  },
+  deleteAllButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+});
+
+export default CameraScreen;
