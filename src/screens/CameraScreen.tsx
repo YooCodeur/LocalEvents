@@ -27,6 +27,7 @@ const CameraScreen = () => {
   const [permission, requestPermission] = useCameraPermissions();
   const [capturedPhotos, setCapturedPhotos] = useState<CapturedPhoto[]>([]);
   const [showGallery, setShowGallery] = useState(false);
+  const [cameraKey, setCameraKey] = useState(0); // Clé pour forcer le re-render
   const cameraRef = useRef<CameraView>(null);
 
   useEffect(() => {
@@ -34,6 +35,23 @@ const CameraScreen = () => {
       requestPermission();
     }
   }, [permission]);
+
+  // Forcer le re-render de la caméra quand les permissions changent
+  useEffect(() => {
+    if (permission?.granted) {
+      // Délai court pour laisser le temps aux permissions de se propager sur iOS
+      const timeoutId = setTimeout(() => {
+        setCameraKey(prev => prev + 1);
+      }, 150);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [permission?.granted]);
+
+  // Fonction pour rafraîchir manuellement la caméra si elle reste noire
+  const refreshCamera = () => {
+    setCameraKey(prev => prev + 1);
+  };
 
   const toggleCameraFacing = () => {
     setFacing((current) => (current === "back" ? "front" : "back"));
@@ -117,7 +135,10 @@ const CameraScreen = () => {
   if (!permission) {
     return (
       <View style={styles.container}>
-        <Text>Chargement...</Text>
+        <View style={styles.loadingContainer}>
+          <Ionicons name="camera-outline" size={80} color="#ccc" />
+          <Text style={styles.loadingText}>Chargement...</Text>
+        </View>
       </View>
     );
   }
@@ -125,41 +146,65 @@ const CameraScreen = () => {
   if (!permission.granted) {
     return (
       <View style={styles.container}>
-        <Text style={styles.message}>
-          Nous avons besoin de votre permission pour utiliser la caméra
-        </Text>
-        <TouchableOpacity style={styles.button} onPress={requestPermission}>
-          <Text style={styles.buttonText}>Autoriser la caméra</Text>
-        </TouchableOpacity>
+        <View style={styles.permissionContainer}>
+          <Ionicons name="camera-outline" size={120} color="#007AFF" />
+          <Text style={styles.permissionTitle}>Accès à la caméra requis</Text>
+          <Text style={styles.permissionText}>
+            Cette application a besoin d'accéder à votre caméra pour prendre des photos.
+          </Text>
+          <TouchableOpacity
+            style={styles.permissionButton}
+            onPress={requestPermission}
+          >
+            <Ionicons name="camera" size={20} color="white" />
+            <Text style={styles.permissionButtonText}>Autoriser l'accès</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      {/* Caméra PLEIN ÉCRAN */}
-      <CameraView ref={cameraRef} style={styles.camera} facing={facing} />
+      {/* Caméra PLEIN ÉCRAN avec clé pour forcer le re-render */}
+      <CameraView 
+        key={cameraKey}
+        ref={cameraRef} 
+        style={styles.camera} 
+        facing={facing} 
+      />
 
       {/* Overlay avec contrôles */}
       <View style={styles.overlay}>
-        {/* Header avec compteur et bouton galerie */}
+        {/* Header avec compteur et boutons */}
         <SafeAreaView style={styles.header}>
-          <TouchableOpacity
-            style={styles.galleryButton}
-            onPress={() => setShowGallery(true)}
-          >
-            <Ionicons name="images" size={24} color="white" />
-            {capturedPhotos.length > 0 && (
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{capturedPhotos.length}</Text>
-              </View>
-            )}
-          </TouchableOpacity>
+          <View style={styles.headerLeft}>
+            <TouchableOpacity
+              style={styles.galleryButton}
+              onPress={() => setShowGallery(true)}
+            >
+              <Ionicons name="images" size={24} color="white" />
+              {capturedPhotos.length > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{capturedPhotos.length}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          </View>
 
           <Text style={styles.photoCount}>
             📸 {capturedPhotos.length} photo
             {capturedPhotos.length !== 1 ? "s" : ""}
           </Text>
+
+          <View style={styles.headerRight}>
+            <TouchableOpacity
+              style={styles.refreshButton}
+              onPress={refreshCamera}
+            >
+              <Ionicons name="refresh" size={20} color="white" />
+            </TouchableOpacity>
+          </View>
         </SafeAreaView>
 
         {/* Contrôles caméra en bas */}
@@ -257,6 +302,14 @@ const styles = StyleSheet.create({
     paddingRight: 20,
     paddingBottom: 15,
   },
+  headerLeft: {
+    minWidth: 75,
+    alignItems: "flex-start",
+  },
+  headerRight: {
+    minWidth: 75,
+    alignItems: "flex-end",
+  },
   galleryButton: {
     width: 55,
     height: 55,
@@ -266,6 +319,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
     position: "relative",
     marginLeft: 20,
+    marginTop: 20,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  refreshButton: {
+    width: 45,
+    height: 45,
+    borderRadius: 22.5,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 20,
     marginTop: 20,
     shadowColor: "#000",
     shadowOffset: {
@@ -465,7 +536,65 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
+  // Loading
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 40,
+  },
+  loadingText: {
+    fontSize: 18,
+    color: "#ccc",
+    marginTop: 15,
+    fontWeight: "500",
+    textAlign: "center",
+  },
+
   // Permissions
+  permissionContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 40,
+  },
+  permissionTitle: {
+    fontSize: 22,
+    color: "#007AFF",
+    marginTop: 20,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  permissionText: {
+    fontSize: 16,
+    color: "#666",
+    marginTop: 15,
+    marginBottom: 30,
+    textAlign: "center",
+    lineHeight: 22,
+  },
+  permissionButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#007AFF",
+    paddingHorizontal: 25,
+    paddingVertical: 15,
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  permissionButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
+    marginLeft: 8,
+  },
   message: {
     textAlign: "center",
     paddingBottom: 15,

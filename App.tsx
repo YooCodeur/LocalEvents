@@ -8,6 +8,7 @@ import { Provider, useDispatch } from "react-redux";
 import { Ionicons } from "@expo/vector-icons";
 import { store, AppDispatch } from "./src/store";
 import { loadFavorites } from "./src/store/slices/favoritesSlice";
+import { initializeCache, schedulePeriodicCacheCleanup } from "./src/utils";
 
 // Importation des écrans
 import EventsScreen from "./src/screens/EventsScreen";
@@ -98,13 +99,35 @@ function AppNavigator() {
   );
 }
 
-// Composant interne qui charge les favoris au démarrage
+// Composant interne qui charge les favoris et initialise le cache au démarrage
 function AppContent() {
   const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
-    // Charger les favoris sauvegardés au démarrage de l'app
-    dispatch(loadFavorites());
+    // Initialisation au démarrage de l'app
+    const initializeApp = async () => {
+      try {
+        // Initialiser le cache (nettoyage des entrées expirées)
+        await initializeCache();
+        
+        // Charger les favoris sauvegardés
+        dispatch(loadFavorites());
+        
+        console.log("✅ Application initialisée avec succès");
+      } catch (error) {
+        console.error("❌ Erreur lors de l'initialisation de l'app:", error);
+      }
+    };
+
+    initializeApp();
+
+    // Programmer le nettoyage périodique du cache
+    const cleanupCache = schedulePeriodicCacheCleanup();
+
+    // Fonction de nettoyage
+    return () => {
+      cleanupCache();
+    };
   }, [dispatch]);
 
   return (

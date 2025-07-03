@@ -3,11 +3,11 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Image,
   StyleSheet,
   ViewStyle,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { CachedImage } from "./CachedImage";
 import type { LocalEvent } from "../types/api";
 
 interface EventCardProps {
@@ -34,7 +34,13 @@ export const EventCard = memo<EventCardProps>(
         onPress={handlePress}
         activeOpacity={0.7}
       >
-        <Image source={{ uri: event.imageUrl }} style={styles.image} />
+        <CachedImage 
+          source={{ uri: event.imageUrl }} 
+          style={styles.image}
+          eventId={event.id}
+          loadingIndicatorSize="small"
+          resizeMode="cover"
+        />
 
         <View style={styles.content}>
           <Text style={styles.title} numberOfLines={2}>

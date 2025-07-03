@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Image,
   ScrollView,
   Linking,
   Alert,
@@ -18,6 +17,7 @@ import {
   type FavoritesState,
 } from "../store/slices/favoritesSlice";
 import { LocalEvent } from "../types/api";
+import { CachedImage } from "../components/CachedImage";
 
 export default function EventDetailScreen({
   route,
@@ -99,11 +99,15 @@ export default function EventDetailScreen({
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* Image principale */}
       <View style={styles.imageContainer}>
-        <Image
+        <CachedImage
           source={{ uri: event.imageUrl }}
           style={styles.eventImage}
+          eventId={event.id}
           onLoadStart={() => setImageLoading(true)}
           onLoadEnd={() => setImageLoading(false)}
+          loadingIndicatorSize="large"
+          loadingIndicatorColor="#007AFF"
+          resizeMode="cover"
         />
         {imageLoading && (
           <View style={styles.imageLoader}>

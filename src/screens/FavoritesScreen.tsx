@@ -4,7 +4,6 @@ import {
   Text,
   FlatList,
   TouchableOpacity,
-  Image,
   StyleSheet,
   Alert,
   ActivityIndicator,
@@ -24,6 +23,7 @@ import {
   type FavoritesState,
 } from "../store/slices/favoritesSlice";
 import { LocalEvent } from "../types/api";
+import { CachedImage } from "../components";
 
 type NavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<MainTabParamList, "Favorites">,
@@ -89,7 +89,13 @@ export default function FavoritesScreen() {
         onPress={() => handleEventPress(item)}
         activeOpacity={0.7}
       >
-        <Image source={{ uri: item.imageUrl }} style={styles.favoriteImage} />
+        <CachedImage 
+          source={{ uri: item.imageUrl }} 
+          style={styles.favoriteImage} 
+          eventId={item.id}
+          loadingIndicatorSize="small"
+          resizeMode="cover"
+        />
         <View style={styles.favoriteInfo}>
           <View style={styles.favoriteHeader}>
             <Text style={styles.favoriteTitle} numberOfLines={2}>

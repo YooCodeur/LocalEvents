@@ -23,6 +23,7 @@ import {
   ErrorMessage,
   EmptyState,
   EventsSkeletonList,
+  CacheStatusIndicator,
 } from "../components";
 
 type NavigationProp = StackNavigationProp<RootStackParamList, "EventDetail">;
@@ -33,7 +34,16 @@ export default function EventsScreen() {
   const navigation = useNavigation<NavigationProp>();
 
   // Hooks personnalisés
-  const { events, loading, error, refreshEvents, loadEvents } = useEvents();
+  const { 
+    events, 
+    loading, 
+    error, 
+    refreshEvents, 
+    loadEvents, 
+    isFromCache, 
+    lastCacheUpdate, 
+    isOfflineMode 
+  } = useEvents();
   const { toggleFavorite, isFavorite } = useFavorites();
 
   // Charger les événements au démarrage
@@ -203,6 +213,12 @@ export default function EventsScreen() {
         ListHeaderComponent={
           <>
             {renderHeroSection()}
+            <CacheStatusIndicator
+              isFromCache={isFromCache}
+              isOfflineMode={isOfflineMode}
+              lastCacheUpdate={lastCacheUpdate}
+              onRefresh={refreshEvents}
+            />
             {renderEventsHeader()}
           </>
         }
