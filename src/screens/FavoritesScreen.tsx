@@ -89,13 +89,22 @@ export default function FavoritesScreen() {
         onPress={() => handleEventPress(item)}
         activeOpacity={0.7}
       >
-        <CachedImage
-          source={{ uri: item.imageUrl }}
-          style={styles.favoriteImage}
-          eventId={item.id}
-          loadingIndicatorSize="small"
-          resizeMode="cover"
-        />
+        <View style={styles.favoriteImageContainer}>
+          <CachedImage
+            source={{ uri: item.imageUrl }}
+            style={styles.favoriteImage}
+            eventId={item.id}
+            loadingIndicatorSize="small"
+            resizeMode="cover"
+          />
+          <View style={styles.favoriteTag}>
+            <View style={styles.favoriteTagContent}>
+              <Ionicons name="heart" size={12} color="#fff" />
+              <Text style={styles.favoriteTagText}>Favori</Text>
+            </View>
+          </View>
+        </View>
+        
         <View style={styles.favoriteInfo}>
           <View style={styles.favoriteHeader}>
             <Text style={styles.favoriteTitle} numberOfLines={2}>
@@ -122,13 +131,6 @@ export default function FavoritesScreen() {
           {item.priceRange && (
             <Text style={styles.favoritePrice}>{item.priceRange}</Text>
           )}
-
-          <View style={styles.favoriteTag}>
-            <View style={styles.favoriteTagContent}>
-              <Ionicons name="heart" size={12} color="#fff" />
-              <Text style={styles.favoriteTagText}>Favori</Text>
-            </View>
-          </View>
         </View>
       </TouchableOpacity>
     ),
@@ -258,7 +260,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     flexDirection: "row",
-    alignItems: "flex-start",
+    alignItems: "center",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -268,15 +270,20 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 8,
   },
+  favoriteImageContainer: {
+    alignItems: "center",
+    marginRight: 16,
+  },
   favoriteImage: {
     width: 90,
     height: 90,
     borderRadius: 12,
     backgroundColor: "#e9ecef",
+    marginBottom: 8,
   },
   favoriteInfo: {
     flex: 1,
-    marginLeft: 16,
+    marginLeft: 6,
   },
   favoriteHeader: {
     flexDirection: "row",
@@ -320,7 +327,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   favoriteTag: {
-    alignSelf: "flex-start",
+    alignSelf: "center",
     backgroundColor: "#dc3545",
     paddingHorizontal: 8,
     paddingVertical: 4,

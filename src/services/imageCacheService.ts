@@ -26,6 +26,7 @@ export interface CachedImageMetadata {
   fileSize: number;
   eventId: string;
   version: string;
+  isFavorite?: boolean; // Nouvelle propriété pour marquer les images de favoris
 }
 
 // Métadonnées globales du cache d'images
@@ -94,12 +95,12 @@ export class ImageCacheService {
         return null;
       }
 
-      // Vérifier si l'image n'est pas expirée
+      // Vérifier si l'image n'est pas expirée (sauf pour les favoris)
       const now = Date.now();
       const isExpired =
         now - imageMetadata.timestamp > IMAGE_CACHE_CONFIG.IMAGE_TTL;
 
-      if (isExpired) {
+      if (isExpired && !imageMetadata.isFavorite) {
         await this.removeImageFromCache(imageKey);
         return null;
       }
@@ -119,6 +120,7 @@ export class ImageCacheService {
   static async cacheImage(
     imageUrl: string,
     eventId: string,
+    isFavorite: boolean = false,
   ): Promise<string | null> {
     try {
       const imageKey = this.generateImageKey(imageUrl);
@@ -155,6 +157,7 @@ export class ImageCacheService {
         fileSize,
         eventId,
         version: IMAGE_CACHE_CONFIG.CACHE_VERSION,
+        isFavorite,
       });
 
       console.log(
@@ -293,35 +296,34 @@ export class ImageCacheService {
     }
   }
 
-  // Appliquer les limites de cache (taille et nombre)
+  // Appliquer les limites de cache (taille et nombre) en préservant les favoris
   static async enforceCacheLimits(metadata: ImageCacheMetadata): Promise<void> {
     try {
       const imageKeys = Object.keys(metadata.images);
+      const nonFavoriteKeys = imageKeys.filter(key => !metadata.images[key].isFavorite);
 
-      // Vérifier le nombre maximum d'images
+      // Vérifier le nombre maximum d'images (seulement les non-favoris)
       if (imageKeys.length > IMAGE_CACHE_CONFIG.MAX_IMAGES) {
-        // Trier par timestamp (plus ancien en premier)
-        const sortedKeys = imageKeys.sort(
+        // Trier les non-favoris par timestamp (plus ancien en premier)
+        const sortedNonFavoriteKeys = nonFavoriteKeys.sort(
           (a, b) => metadata.images[a].timestamp - metadata.images[b].timestamp,
         );
 
-        const toRemove = sortedKeys.slice(
-          0,
-          imageKeys.length - IMAGE_CACHE_CONFIG.MAX_IMAGES,
-        );
+        const excessCount = imageKeys.length - IMAGE_CACHE_CONFIG.MAX_IMAGES;
+        const toRemove = sortedNonFavoriteKeys.slice(0, Math.min(excessCount, nonFavoriteKeys.length));
 
         for (const key of toRemove) {
           await this.removeImageFromCache(key);
         }
       }
 
-      // Vérifier la taille maximale
+      // Vérifier la taille maximale (seulement les non-favoris)
       if (metadata.totalSize > IMAGE_CACHE_CONFIG.MAX_CACHE_SIZE) {
-        const sortedKeys = Object.keys(metadata.images).sort(
+        const sortedNonFavoriteKeys = nonFavoriteKeys.sort(
           (a, b) => metadata.images[a].timestamp - metadata.images[b].timestamp,
         );
 
-        for (const key of sortedKeys) {
+        for (const key of sortedNonFavoriteKeys) {
           if (metadata.totalSize <= IMAGE_CACHE_CONFIG.MAX_CACHE_SIZE * 0.8) {
             break; // Réduire à 80% de la limite pour éviter les suppressions fréquentes
           }
@@ -337,18 +339,18 @@ export class ImageCacheService {
     }
   }
 
-  // Nettoyer les images expirées
+  // Nettoyer les images expirées (en préservant les favoris)
   static async cleanupExpiredImages(): Promise<void> {
     try {
       const metadata = await this.getImageMetadata();
       const now = Date.now();
       const expiredKeys: string[] = [];
 
-      // Identifier les images expirées
+      // Identifier les images expirées (sauf les favoris)
       for (const [key, imageData] of Object.entries(metadata.images)) {
         const isExpired =
           now - imageData.timestamp > IMAGE_CACHE_CONFIG.IMAGE_TTL;
-        if (isExpired) {
+        if (isExpired && !imageData.isFavorite) {
           expiredKeys.push(key);
         }
       }
@@ -367,7 +369,7 @@ export class ImageCacheService {
       );
 
       console.log(
-        `✨ Nettoyage des images terminé: ${expiredKeys.length} images supprimées`,
+        `✨ Nettoyage des images terminé: ${expiredKeys.length} images supprimées (favoris préservés)`,
       );
     } catch (error) {
       console.error("❌ Erreur lors du nettoyage des images:", error);
@@ -435,6 +437,94 @@ export class ImageCacheService {
         totalSize: 0,
         totalSizeMB: 0,
         lastCleanup: null,
+      };
+    }
+  }
+
+  // Marquer une image comme favori (la préserver indéfiniment)
+  static async markImageAsFavorite(imageUrl: string, eventId: string): Promise<void> {
+    try {
+      const imageKey = this.generateImageKey(imageUrl);
+      const metadata = await this.getImageMetadata();
+      const imageMetadata = metadata.images[imageKey];
+
+      if (imageMetadata) {
+        // Mettre à jour les métadonnées existantes
+        imageMetadata.isFavorite = true;
+        await this.updateImageMetadata(imageKey, imageMetadata);
+        console.log(`⭐ Image marquée comme favori: ${imageKey}`);
+      } else {
+        // L'image n'est pas en cache, la télécharger comme favori
+        await this.cacheImage(imageUrl, eventId, true);
+        console.log(`⭐ Image téléchargée et marquée comme favori: ${imageKey}`);
+      }
+    } catch (error) {
+      console.error("❌ Erreur lors du marquage de l'image comme favori:", error);
+    }
+  }
+
+  // Retirer le marquage favori d'une image
+  static async unmarkImageAsFavorite(imageUrl: string): Promise<void> {
+    try {
+      const imageKey = this.generateImageKey(imageUrl);
+      const metadata = await this.getImageMetadata();
+      const imageMetadata = metadata.images[imageKey];
+
+      if (imageMetadata) {
+        imageMetadata.isFavorite = false;
+        await this.updateImageMetadata(imageKey, imageMetadata);
+        console.log(`📌 Image non-favori: ${imageKey}`);
+      }
+    } catch (error) {
+      console.error("❌ Erreur lors du retrait du marquage favori:", error);
+    }
+  }
+
+  // Mettre en cache toutes les images des favoris
+  static async cacheFavoriteImages(favoriteEvents: LocalEvent[]): Promise<void> {
+    try {
+      await this.initializeCacheDirectory();
+
+      const cachePromises = favoriteEvents.map((event) =>
+        this.markImageAsFavorite(event.imageUrl, event.id),
+      );
+
+      await Promise.allSettled(cachePromises);
+      console.log(`⭐ ${favoriteEvents.length} images de favoris mises en cache`);
+    } catch (error) {
+      console.error("❌ Erreur lors de la mise en cache des favoris:", error);
+    }
+  }
+
+  // Obtenir les statistiques spécifiques aux favoris
+  static async getFavoritesCacheStats(): Promise<{
+    totalFavoriteImages: number;
+    favoriteCacheSize: number;
+    favoriteCacheSizeMB: number;
+  }> {
+    try {
+      const metadata = await this.getImageMetadata();
+      let totalFavoriteImages = 0;
+      let favoriteCacheSize = 0;
+
+      for (const imageData of Object.values(metadata.images)) {
+        if (imageData.isFavorite) {
+          totalFavoriteImages++;
+          favoriteCacheSize += imageData.fileSize;
+        }
+      }
+
+      return {
+        totalFavoriteImages,
+        favoriteCacheSize,
+        favoriteCacheSizeMB: Math.round((favoriteCacheSize / (1024 * 1024)) * 100) / 100,
+      };
+    } catch (error) {
+      console.error("❌ Erreur lors de la récupération des stats favoris:", error);
+      return {
+        totalFavoriteImages: 0,
+        favoriteCacheSize: 0,
+        favoriteCacheSizeMB: 0,
       };
     }
   }

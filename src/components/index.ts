@@ -10,3 +10,4 @@ export { LoadingSpinner } from "./LoadingSpinner";
 export { CacheStatusIndicator } from "./CacheStatusIndicator";
 export * from "./CacheDebugPanel";
 export * from "./CachedImage";
+export { FavoritesCacheDebug } from "./FavoritesCacheDebug";

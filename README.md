@@ -290,7 +290,7 @@ interface CacheStrategy {
 // Background sync
 ```
 
-### 🧪 Qualité et tests
+###  Qualité et tests
 
 #### **1. Tests complets**
 

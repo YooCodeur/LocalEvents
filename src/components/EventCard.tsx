@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     flexDirection: "row",
-    alignItems: "flex-start",
+    alignItems: "center",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,

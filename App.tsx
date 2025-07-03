@@ -31,6 +31,7 @@ function MainTabs() {
       screenOptions={{
         tabBarActiveTintColor: COLORS.primary,
         tabBarInactiveTintColor: "#666",
+        headerTitleAlign: "center",
       }}
     >
       <Tab.Screen
@@ -81,7 +82,11 @@ function MainTabs() {
 function AppNavigator() {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator
+        screenOptions={{
+          headerTitleAlign: "center",
+        }}
+      >
         <Stack.Screen
           name="MainTabs"
           component={MainTabs}

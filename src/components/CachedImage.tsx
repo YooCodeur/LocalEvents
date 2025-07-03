@@ -49,39 +49,45 @@ export const CachedImage: React.FC<CachedImageProps> = ({
   useEffect(() => {
     let isMounted = true;
 
-    // Afficher immédiatement l'image originale pour une UX rapide
-    setImageSource(source);
-    setIsLoading(true);
-    setHasError(false);
-    onLoadStart?.();
-
-    // Vérifier le cache en arrière-plan et remplacer si disponible
-    const checkCacheAndReplace = async () => {
+    // D'abord, vérifier le cache pour les favoris en priorité
+    const loadImageWithCachePriority = async () => {
       try {
+        setIsLoading(true);
+        setHasError(false);
+        onLoadStart?.();
+
+        // Vérifier d'abord le cache
         const cachedPath = await ImageCacheService.isImageCached(source.uri);
 
         if (isMounted && cachedPath) {
-          // Remplacer par l'image en cache si elle existe
+          // Image trouvée en cache - priorité absolue
           setImageSource({ uri: cachedPath });
-          console.log(`🔄 Image remplacée par la version en cache: ${eventId}`);
-          // Si l'image est en cache, elle est déjà "chargée"
           setIsLoading(false);
           onLoadEnd?.();
-        } else if (isMounted && !cachedPath) {
-          // Pas en cache, télécharger en arrière-plan pour la prochaine fois
+          console.log(`✅ Image chargée depuis le cache: ${eventId}`);
+          return;
+        }
+
+        // Pas en cache - afficher l'image originale
+        if (isMounted) {
+          setImageSource(source);
+          
+          // Télécharger en arrière-plan pour la prochaine fois
           ImageCacheService.cacheImage(source.uri, eventId).catch((error) => {
-            console.log(
-              `⚠️ Échec du cache d'image en arrière-plan: ${error.message}`,
-            );
+            console.log(`⚠️ Échec du cache d'image: ${error.message}`);
           });
         }
       } catch (error) {
-        console.error("❌ Erreur lors de la vérification du cache:", error);
+        console.error("❌ Erreur lors du chargement de l'image:", error);
+        if (isMounted) {
+          // En cas d'erreur, essayer l'image originale
+          setImageSource(source);
+        }
       }
     };
 
-    // Lancer la vérification du cache sans bloquer l'affichage
-    checkCacheAndReplace();
+    // Lancer le chargement avec priorité cache
+    loadImageWithCachePriority();
 
     return () => {
       isMounted = false;

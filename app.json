@@ -8,24 +8,30 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "assetBundlePatterns": ["**/*"],
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Cette application a besoin d'accéder à votre caméra pour prendre des photos d'événements locaux.",
+          "microphonePermission": "Cette application a besoin d'accéder à votre microphone pour enregistrer des vidéos avec son.",
+          "recordAudioAndroid": true
+        }
+      ]
+    ],
     "ios": {
-      "supportsTablet": true,
-      "infoPlist": {
-        "NSCameraUsageDescription": "Cette application a besoin d'accéder à votre caméra pour prendre des photos."
-      }
+      "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
-      "permissions": ["android.permission.CAMERA"]
+      "edgeToEdgeEnabled": true
     },
     "web": {
       "favicon": "./assets/favicon.png"
