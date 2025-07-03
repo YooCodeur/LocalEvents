@@ -26,14 +26,17 @@ export const loadFavorites = createAsyncThunk(
     try {
       const storedFavorites = await AsyncStorage.getItem(FAVORITES_STORAGE_KEY);
       const favorites = storedFavorites ? JSON.parse(storedFavorites) : [];
-      
+
       // Mettre en cache les images des favoris en arrière-plan
       if (favorites.length > 0) {
         ImageCacheService.cacheFavoriteImages(favorites).catch((error) => {
-          console.warn("⚠️ Impossible de mettre en cache les images des favoris:", error);
+          console.warn(
+            "⚠️ Impossible de mettre en cache les images des favoris:",
+            error,
+          );
         });
       }
-      
+
       return favorites;
     } catch {
       throw new Error("Erreur lors du chargement des favoris");
@@ -79,7 +82,10 @@ export const addFavoriteAsync = createAsyncThunk(
       try {
         await ImageCacheService.markImageAsFavorite(event.imageUrl, event.id);
       } catch (error) {
-        console.warn("⚠️ Impossible de mettre en cache l'image du favori:", error);
+        console.warn(
+          "⚠️ Impossible de mettre en cache l'image du favori:",
+          error,
+        );
       }
 
       return newEvent;
@@ -92,7 +98,9 @@ export const removeFavoriteAsync = createAsyncThunk(
   "favorites/removeFavoriteAsync",
   async (eventId: string, { getState }) => {
     const state = getState() as { favorites: FavoritesState };
-    const eventToRemove = state.favorites.favorites.find(fav => fav.id === eventId);
+    const eventToRemove = state.favorites.favorites.find(
+      (fav) => fav.id === eventId,
+    );
     const updatedFavorites = state.favorites.favorites.filter(
       (fav) => fav.id !== eventId,
     );
@@ -108,7 +116,10 @@ export const removeFavoriteAsync = createAsyncThunk(
       try {
         await ImageCacheService.unmarkImageAsFavorite(eventToRemove.imageUrl);
       } catch (error) {
-        console.warn("⚠️ Impossible de retirer le marquage favori de l'image:", error);
+        console.warn(
+          "⚠️ Impossible de retirer le marquage favori de l'image:",
+          error,
+        );
       }
     }
 
@@ -154,7 +165,10 @@ export const toggleFavoriteAsync = createAsyncThunk(
         await ImageCacheService.unmarkImageAsFavorite(event.imageUrl);
       }
     } catch (error) {
-      console.warn(`⚠️ Impossible de ${action === "add" ? "mettre en cache" : "retirer le marquage"} de l'image:`, error);
+      console.warn(
+        `⚠️ Impossible de ${action === "add" ? "mettre en cache" : "retirer le marquage"} de l'image:`,
+        error,
+      );
     }
 
     return { event, action };

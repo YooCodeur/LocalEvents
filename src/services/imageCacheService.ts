@@ -300,7 +300,9 @@ export class ImageCacheService {
   static async enforceCacheLimits(metadata: ImageCacheMetadata): Promise<void> {
     try {
       const imageKeys = Object.keys(metadata.images);
-      const nonFavoriteKeys = imageKeys.filter(key => !metadata.images[key].isFavorite);
+      const nonFavoriteKeys = imageKeys.filter(
+        (key) => !metadata.images[key].isFavorite,
+      );
 
       // Vérifier le nombre maximum d'images (seulement les non-favoris)
       if (imageKeys.length > IMAGE_CACHE_CONFIG.MAX_IMAGES) {
@@ -310,7 +312,10 @@ export class ImageCacheService {
         );
 
         const excessCount = imageKeys.length - IMAGE_CACHE_CONFIG.MAX_IMAGES;
-        const toRemove = sortedNonFavoriteKeys.slice(0, Math.min(excessCount, nonFavoriteKeys.length));
+        const toRemove = sortedNonFavoriteKeys.slice(
+          0,
+          Math.min(excessCount, nonFavoriteKeys.length),
+        );
 
         for (const key of toRemove) {
           await this.removeImageFromCache(key);
@@ -442,7 +447,10 @@ export class ImageCacheService {
   }
 
   // Marquer une image comme favori (la préserver indéfiniment)
-  static async markImageAsFavorite(imageUrl: string, eventId: string): Promise<void> {
+  static async markImageAsFavorite(
+    imageUrl: string,
+    eventId: string,
+  ): Promise<void> {
     try {
       const imageKey = this.generateImageKey(imageUrl);
       const metadata = await this.getImageMetadata();
@@ -456,10 +464,15 @@ export class ImageCacheService {
       } else {
         // L'image n'est pas en cache, la télécharger comme favori
         await this.cacheImage(imageUrl, eventId, true);
-        console.log(`⭐ Image téléchargée et marquée comme favori: ${imageKey}`);
+        console.log(
+          `⭐ Image téléchargée et marquée comme favori: ${imageKey}`,
+        );
       }
     } catch (error) {
-      console.error("❌ Erreur lors du marquage de l'image comme favori:", error);
+      console.error(
+        "❌ Erreur lors du marquage de l'image comme favori:",
+        error,
+      );
     }
   }
 
@@ -481,7 +494,9 @@ export class ImageCacheService {
   }
 
   // Mettre en cache toutes les images des favoris
-  static async cacheFavoriteImages(favoriteEvents: LocalEvent[]): Promise<void> {
+  static async cacheFavoriteImages(
+    favoriteEvents: LocalEvent[],
+  ): Promise<void> {
     try {
       await this.initializeCacheDirectory();
 
@@ -490,7 +505,9 @@ export class ImageCacheService {
       );
 
       await Promise.allSettled(cachePromises);
-      console.log(`⭐ ${favoriteEvents.length} images de favoris mises en cache`);
+      console.log(
+        `⭐ ${favoriteEvents.length} images de favoris mises en cache`,
+      );
     } catch (error) {
       console.error("❌ Erreur lors de la mise en cache des favoris:", error);
     }
@@ -517,10 +534,14 @@ export class ImageCacheService {
       return {
         totalFavoriteImages,
         favoriteCacheSize,
-        favoriteCacheSizeMB: Math.round((favoriteCacheSize / (1024 * 1024)) * 100) / 100,
+        favoriteCacheSizeMB:
+          Math.round((favoriteCacheSize / (1024 * 1024)) * 100) / 100,
       };
     } catch (error) {
-      console.error("❌ Erreur lors de la récupération des stats favoris:", error);
+      console.error(
+        "❌ Erreur lors de la récupération des stats favoris:",
+        error,
+      );
       return {
         totalFavoriteImages: 0,
         favoriteCacheSize: 0,

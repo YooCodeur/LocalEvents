@@ -1,10 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-} from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ImageCacheService } from "../services/imageCacheService";
 
@@ -52,7 +47,7 @@ export const FavoritesCacheDebug: React.FC = () => {
             <Text style={styles.statLabel}>Images en cache :</Text>
             <Text style={styles.statValue}>{stats.totalFavoriteImages}</Text>
           </View>
-          
+
           <View style={styles.statRow}>
             <Text style={styles.statLabel}>Taille totale :</Text>
             <Text style={styles.statValue}>{stats.favoriteCacheSizeMB} MB</Text>
@@ -144,4 +139,4 @@ const styles = StyleSheet.create({
     color: "#007AFF",
     fontWeight: "500",
   },
-}); 
+});

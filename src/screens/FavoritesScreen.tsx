@@ -104,7 +104,7 @@ export default function FavoritesScreen() {
             </View>
           </View>
         </View>
-        
+
         <View style={styles.favoriteInfo}>
           <View style={styles.favoriteHeader}>
             <Text style={styles.favoriteTitle} numberOfLines={2}>

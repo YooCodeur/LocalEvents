@@ -71,7 +71,7 @@ export const CachedImage: React.FC<CachedImageProps> = ({
         // Pas en cache - afficher l'image originale
         if (isMounted) {
           setImageSource(source);
-          
+
           // Télécharger en arrière-plan pour la prochaine fois
           ImageCacheService.cacheImage(source.uri, eventId).catch((error) => {
             console.log(`⚠️ Échec du cache d'image: ${error.message}`);

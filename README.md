@@ -29,7 +29,7 @@ LocalEvents est une application React Native TypeScript qui permet aux utilisate
 1. **Cloner le dépôt**
 
 ```bash
-git clone <URL_DU_DEPOT>
+git clone <https://github.com/YooCodeur/LocalEvents.git>
 cd LocalEvents
 ```
 
@@ -166,13 +166,13 @@ Exemples : `useEvents`, `useFavorites`, `useNetworkStatus`
 - **LinearGradient** pour les sections hero : Aspect moderne
 - **Composants modulaires** : `CachedImage`, `EventCard`, etc.
 
-#### 📷 **Module caméra**
+#### **Module caméra**
 
 - **expo-camera** : API simple, permissions automatiques
 - **Stockage local** des photos : Pas de cloud pour cette démo
 - **Interface native** : Contrôles familiers iOS/Android
 
-#### 🔧 **Optimisations**
+####  **Optimisations**
 
 - **Lazy loading** des images avec cache
 - **Memoization** avec `useCallback`/`useMemo`
@@ -387,7 +387,7 @@ interface CacheStrategy {
 // Microservices pour scalabilité
 ```
 
-## 🛠️ Contraintes respectées
+## Contraintes respectées
 
 ✅ **React Native ≥ 0.74** : Version 0.79 utilisée  
 ✅ **TypeScript** : Typage strict partout  
@@ -400,12 +400,3 @@ interface CacheStrategy {
 ✅ **Pull-to-refresh** : Implémenté sur tous les écrans  
 ✅ **Skeleton loaders** : UX fluide pendant chargement
 
-## Métriques de performance
-
-- **Temps de démarrage** : ~2-3s (cold start)
-- **Taille du bundle** : ~15MB (optimisable à ~8MB)
-- **Cache hit ratio** : ~80% après utilisation
-- **Temps de réponse API** : ~300-500ms (avec retry)
-- **Persistence favoris** : <100ms (AsyncStorage)
-
----
