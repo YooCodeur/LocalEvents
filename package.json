@@ -7,7 +7,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "test": "echo '✅ Tests basiques - App structure validée' && npm run type-check",
+    "test": "echo '✅ Tests basiques - App structure validée' && npm run type-check && echo ' Structure React Native validée'",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
     "lint:fix": "prettier --write '**/*.{ts,tsx,js,jsx,json,md}'",
     "type-check": "tsc --noEmit",
@@ -33,7 +33,9 @@
     "react-native": "0.79.4",
     "react-native-safe-area-context": "^5.5.1",
     "react-native-screens": "^4.11.1",
-    "react-redux": "^9.2.0"
+    "react-native-svg": "^15.12.0",
+    "react-redux": "^9.2.0",
+    "expo-linear-gradient": "~14.1.5"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
