@@ -91,8 +91,7 @@ const styles = StyleSheet.create({
   },
   offlineContainer: {
     backgroundColor: "#fff8dc", // Light yellow background
-    borderLeftWidth: 3,
-    borderLeftColor: "#f39c12",
+
   },
   cacheContainer: {
     backgroundColor: "#f0f8ff", // Light blue background

@@ -1,6 +1,6 @@
 export const COLORS = {
   // Couleurs principales
-  primary: "#007AFF",
+  primary: "#5856D6",
   secondary: "#5856D6",
   success: "#28a745",
   warning: "#ffc107",
@@ -27,10 +27,10 @@ export const COLORS = {
 
   // Couleurs d'interaction
   interaction: {
-    active: "#007AFF",
+    active: "#5856D6",
     inactive: "#666666",
-    hover: "#0056b3",
-    pressed: "#004085",
+    hover: "#4644B3",
+    pressed: "#383592",
   },
 
   // Couleurs de statut

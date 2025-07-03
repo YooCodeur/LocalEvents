@@ -9,6 +9,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { store, AppDispatch } from "./src/store";
 import { loadFavorites } from "./src/store/slices/favoritesSlice";
 import { initializeCache, schedulePeriodicCacheCleanup } from "./src/utils";
+import { COLORS } from "./src/constants";
 
 // Importation des écrans
 import EventsScreen from "./src/screens/EventsScreen";
@@ -28,7 +29,7 @@ function MainTabs() {
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarActiveTintColor: "#007AFF",
+        tabBarActiveTintColor: COLORS.primary,
         tabBarInactiveTintColor: "#666",
       }}
     >

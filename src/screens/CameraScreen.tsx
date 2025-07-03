@@ -48,10 +48,7 @@ const CameraScreen = () => {
     }
   }, [permission?.granted]);
 
-  // Fonction pour rafraîchir manuellement la caméra si elle reste noire
-  const refreshCamera = () => {
-    setCameraKey((prev) => prev + 1);
-  };
+
 
   const toggleCameraFacing = () => {
     setFacing((current) => (current === "back" ? "front" : "back"));
@@ -198,14 +195,7 @@ const CameraScreen = () => {
             {capturedPhotos.length !== 1 ? "s" : ""}
           </Text>
 
-          <View style={styles.headerRight}>
-            <TouchableOpacity
-              style={styles.refreshButton}
-              onPress={refreshCamera}
-            >
-              <Ionicons name="refresh" size={20} color="white" />
-            </TouchableOpacity>
-          </View>
+
         </SafeAreaView>
 
         {/* Contrôles caméra en bas */}
@@ -307,10 +297,7 @@ const styles = StyleSheet.create({
     minWidth: 75,
     alignItems: "flex-start",
   },
-  headerRight: {
-    minWidth: 75,
-    alignItems: "flex-end",
-  },
+
   galleryButton: {
     width: 55,
     height: 55,
@@ -330,24 +317,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
-  refreshButton: {
-    width: 45,
-    height: 45,
-    borderRadius: 22.5,
-    backgroundColor: "rgba(0,0,0,0.6)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 20,
-    marginTop: 20,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
-  },
+
   badge: {
     position: "absolute",
     top: -8,
