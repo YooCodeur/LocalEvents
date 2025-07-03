@@ -45,50 +45,41 @@ export const CachedImage: React.FC<CachedImageProps> = ({
   const [imageSource, setImageSource] = useState<{ uri: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-  const [cacheChecked, setCacheChecked] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
 
-    const loadImage = async () => {
-      try {
-        setIsLoading(true);
-        setHasError(false);
-        onLoadStart?.();
+    // Afficher immédiatement l'image originale pour une UX rapide
+    setImageSource(source);
+    setIsLoading(true);
+    setHasError(false);
+    onLoadStart?.();
 
-        // Vérifier si l'image est en cache
+    // Vérifier le cache en arrière-plan et remplacer si disponible
+    const checkCacheAndReplace = async () => {
+      try {
         const cachedPath = await ImageCacheService.isImageCached(source.uri);
         
-        if (!isMounted) return;
-
-        if (cachedPath) {
-          // Utiliser l'image en cache
+        if (isMounted && cachedPath) {
+          // Remplacer par l'image en cache si elle existe
           setImageSource({ uri: cachedPath });
-          console.log(`📱 Image chargée depuis le cache: ${eventId}`);
-          // Image en cache = chargement instantané
+          console.log(`🔄 Image remplacée par la version en cache: ${eventId}`);
+          // Si l'image est en cache, elle est déjà "chargée"
           setIsLoading(false);
           onLoadEnd?.();
-        } else {
-          // Utiliser l'image originale et démarrer le téléchargement en arrière-plan
-          setImageSource(source);
-          
-          // Télécharger en arrière-plan pour la prochaine fois (sans attendre)
+        } else if (isMounted && !cachedPath) {
+          // Pas en cache, télécharger en arrière-plan pour la prochaine fois
           ImageCacheService.cacheImage(source.uri, eventId).catch(error => {
             console.log(`⚠️ Échec du cache d'image en arrière-plan: ${error.message}`);
           });
         }
-        
-        setCacheChecked(true);
       } catch (error) {
-        console.error('❌ Erreur lors du chargement de l\'image:', error);
-        if (isMounted) {
-          setImageSource(source); // Fallback vers l'URL originale
-          setCacheChecked(true);
-        }
+        console.error('❌ Erreur lors de la vérification du cache:', error);
       }
     };
 
-    loadImage();
+    // Lancer la vérification du cache sans bloquer l'affichage
+    checkCacheAndReplace();
 
     return () => {
       isMounted = false;
@@ -106,23 +97,7 @@ export const CachedImage: React.FC<CachedImageProps> = ({
     onError?.();
   };
 
-  // Afficher le placeholder pendant que le cache est vérifié
-  if (!cacheChecked) {
-    return (
-      <View style={[styles.container, containerStyle, style]}>
-        {placeholder || (
-          showLoadingIndicator && (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator 
-                size={loadingIndicatorSize} 
-                color={loadingIndicatorColor} 
-              />
-            </View>
-          )
-        )}
-      </View>
-    );
-  }
+
 
   // Afficher le placeholder d'erreur si l'image a échoué
   if (hasError) {
