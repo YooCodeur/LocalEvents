@@ -22,6 +22,8 @@ import type { StackNavigationProp } from "@react-navigation/stack";
 import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import { RootState, AppDispatch } from "../store";
 import type { RootStackParamList, MainTabParamList } from "../types/navigation";
+import { COLORS } from "../constants";
+
 import {
   searchEvents,
   setSearchParams,
@@ -399,7 +401,7 @@ export default function SearchScreen() {
                     <Ionicons
                       name="calendar-outline"
                       size={20}
-                      color="#007AFF"
+                      color="#5856D6"
                       style={styles.dateButtonIcon}
                     />
                     <Text style={styles.dateButtonText}>
@@ -458,7 +460,7 @@ export default function SearchScreen() {
                     <Ionicons
                       name="calendar-outline"
                       size={20}
-                      color="#007AFF"
+                      color="#5856D6"
                       style={styles.dateButtonIcon}
                     />
                     <Text style={styles.dateButtonText}>
@@ -544,11 +546,7 @@ export default function SearchScreen() {
             </View>
 
             <View style={styles.helperContainer}>
-              <Ionicons
-                name="information-circle-outline"
-                size={16}
-                color="#6c757d"
-              />
+          
               <Text style={styles.dateHelper}>
                 Sélectionnez des dates pour filtrer les événements dans une
                 période précise
@@ -667,7 +665,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   suggestionChipSelected: {
-    backgroundColor: "#007AFF",
+    backgroundColor: "#5856D6",
   },
   suggestionText: {
     fontSize: 14,
@@ -713,7 +711,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   searchButton: {
-    backgroundColor: "#007AFF",
+    backgroundColor: "#5856D6",
   },
   resetButton: {
     backgroundColor: "#fff",
@@ -794,7 +792,7 @@ const styles = StyleSheet.create({
   helperContainer: {
     flexDirection: "row",
     alignItems: "flex-start",
-    gap: 8,
+    gap: 1,
     marginTop: 12,
   },
   actionButtonContent: {
