@@ -109,10 +109,10 @@ function AppContent() {
       try {
         // Initialiser le cache (nettoyage des entrées expirées)
         await initializeCache();
-        
+
         // Charger les favoris sauvegardés
         dispatch(loadFavorites());
-        
+
         console.log("✅ Application initialisée avec succès");
       } catch (error) {
         console.error("❌ Erreur lors de l'initialisation de l'app:", error);

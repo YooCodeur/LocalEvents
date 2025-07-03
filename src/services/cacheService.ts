@@ -45,16 +45,16 @@ export class CacheService {
       startDateTime: searchParams.startDateTime || "",
       endDateTime: searchParams.endDateTime || "",
     };
-    
+
     return `events_${normalized.city}_${normalized.keyword}_${normalized.page}_${normalized.size}_${normalized.startDateTime}_${normalized.endDateTime}`;
   }
 
   // Vérifier si une entrée de cache est valide
   static isCacheValid(entry: CacheEntry): boolean {
     const now = Date.now();
-    const isExpired = (now - entry.timestamp) > entry.ttl;
+    const isExpired = now - entry.timestamp > entry.ttl;
     const isVersionValid = entry.version === CACHE_CONFIG.CACHE_VERSION;
-    
+
     return !isExpired && isVersionValid;
   }
 
@@ -62,12 +62,12 @@ export class CacheService {
   static async cacheEvents(
     events: LocalEvent[],
     searchParams: SearchParams,
-    ttl: number = CACHE_CONFIG.DEFAULT_TTL
+    ttl: number = CACHE_CONFIG.DEFAULT_TTL,
   ): Promise<void> {
     try {
       const cacheKey = this.generateCacheKey(searchParams);
       const storageKey = `${EVENTS_CACHE_KEY}_${cacheKey}`;
-      
+
       const cacheEntry: CacheEntry = {
         key: cacheKey,
         data: events,
@@ -79,15 +79,19 @@ export class CacheService {
 
       // Sauvegarder l'entrée de cache
       await AsyncStorage.setItem(storageKey, JSON.stringify(cacheEntry));
-      
+
       // Mettre à jour les métadonnées
       await this.updateCacheMetadata(cacheKey);
-      
-      console.log(`✅ Cache sauvegardé: ${cacheKey} (${events.length} événements)`);
-      
+
+      console.log(
+        `✅ Cache sauvegardé: ${cacheKey} (${events.length} événements)`,
+      );
+
       // Télécharger les images en arrière-plan (sans bloquer)
-      ImageCacheService.cacheEventsImages(events).catch(error => {
-        console.log(`⚠️ Échec du cache d'images en arrière-plan: ${error.message}`);
+      ImageCacheService.cacheEventsImages(events).catch((error) => {
+        console.log(
+          `⚠️ Échec du cache d'images en arrière-plan: ${error.message}`,
+        );
       });
     } catch (error) {
       console.error("❌ Erreur lors de la sauvegarde du cache:", error);
@@ -95,20 +99,24 @@ export class CacheService {
   }
 
   // Récupérer des événements depuis le cache
-  static async getCachedEvents(searchParams: SearchParams): Promise<LocalEvent[] | null> {
+  static async getCachedEvents(
+    searchParams: SearchParams,
+  ): Promise<LocalEvent[] | null> {
     try {
       const cacheKey = this.generateCacheKey(searchParams);
       const storageKey = `${EVENTS_CACHE_KEY}_${cacheKey}`;
-      
+
       const cachedData = await AsyncStorage.getItem(storageKey);
       if (!cachedData) {
         return null;
       }
 
       const cacheEntry: CacheEntry = JSON.parse(cachedData);
-      
+
       if (this.isCacheValid(cacheEntry)) {
-        console.log(`✅ Cache hit: ${cacheKey} (${cacheEntry.data.length} événements)`);
+        console.log(
+          `✅ Cache hit: ${cacheKey} (${cacheEntry.data.length} événements)`,
+        );
         return cacheEntry.data;
       } else {
         // Cache expiré, le supprimer
@@ -126,9 +134,13 @@ export class CacheService {
   static async updateCacheMetadata(cacheKey: string): Promise<void> {
     try {
       const metadataString = await AsyncStorage.getItem(CACHE_METADATA_KEY);
-      let metadata: CacheMetadata = metadataString 
+      let metadata: CacheMetadata = metadataString
         ? JSON.parse(metadataString)
-        : { entries: [], lastCleanup: Date.now(), version: CACHE_CONFIG.CACHE_VERSION };
+        : {
+            entries: [],
+            lastCleanup: Date.now(),
+            version: CACHE_CONFIG.CACHE_VERSION,
+          };
 
       // Ajouter la nouvelle entrée si elle n'existe pas
       if (!metadata.entries.includes(cacheKey)) {
@@ -155,13 +167,16 @@ export class CacheService {
     try {
       const storageKey = `${EVENTS_CACHE_KEY}_${cacheKey}`;
       await AsyncStorage.removeItem(storageKey);
-      
+
       // Mettre à jour les métadonnées
       const metadataString = await AsyncStorage.getItem(CACHE_METADATA_KEY);
       if (metadataString) {
         const metadata: CacheMetadata = JSON.parse(metadataString);
-        metadata.entries = metadata.entries.filter(key => key !== cacheKey);
-        await AsyncStorage.setItem(CACHE_METADATA_KEY, JSON.stringify(metadata));
+        metadata.entries = metadata.entries.filter((key) => key !== cacheKey);
+        await AsyncStorage.setItem(
+          CACHE_METADATA_KEY,
+          JSON.stringify(metadata),
+        );
       }
     } catch (error) {
       console.error("❌ Erreur lors de la suppression du cache:", error);
@@ -180,10 +195,10 @@ export class CacheService {
       for (const cacheKey of metadata.entries) {
         const storageKey = `${EVENTS_CACHE_KEY}_${cacheKey}`;
         const cachedData = await AsyncStorage.getItem(storageKey);
-        
+
         if (cachedData) {
           const cacheEntry: CacheEntry = JSON.parse(cachedData);
-          
+
           if (this.isCacheValid(cacheEntry)) {
             validEntries.push(cacheKey);
           } else {
@@ -197,11 +212,13 @@ export class CacheService {
       metadata.entries = validEntries;
       metadata.lastCleanup = Date.now();
       await AsyncStorage.setItem(CACHE_METADATA_KEY, JSON.stringify(metadata));
-      
-      console.log(`✨ Nettoyage terminé: ${validEntries.length} entrées conservées`);
-      
+
+      console.log(
+        `✨ Nettoyage terminé: ${validEntries.length} entrées conservées`,
+      );
+
       // Nettoyer aussi les images expirées
-      ImageCacheService.cleanupExpiredImages().catch(error => {
+      ImageCacheService.cleanupExpiredImages().catch((error) => {
         console.log(`⚠️ Échec du nettoyage des images: ${error.message}`);
       });
     } catch (error) {
@@ -215,7 +232,7 @@ export class CacheService {
       const metadataString = await AsyncStorage.getItem(CACHE_METADATA_KEY);
       if (metadataString) {
         const metadata: CacheMetadata = JSON.parse(metadataString);
-        
+
         // Supprimer toutes les entrées de cache
         for (const cacheKey of metadata.entries) {
           const storageKey = `${EVENTS_CACHE_KEY}_${cacheKey}`;
@@ -225,11 +242,11 @@ export class CacheService {
 
       // Supprimer les métadonnées
       await AsyncStorage.removeItem(CACHE_METADATA_KEY);
-      
+
       console.log("🗑️ Tout le cache a été vidé");
-      
+
       // Vider aussi le cache d'images
-      ImageCacheService.clearAllImages().catch(error => {
+      ImageCacheService.clearAllImages().catch((error) => {
         console.log(`⚠️ Échec du vidage du cache d'images: ${error.message}`);
       });
     } catch (error) {
@@ -270,4 +287,4 @@ export class CacheService {
       return { totalEntries: 0, totalSize: 0, lastCleanup: null };
     }
   }
-} 
+}

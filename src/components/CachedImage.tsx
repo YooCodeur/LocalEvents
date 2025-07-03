@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Image,
   View,
@@ -7,20 +7,20 @@ import {
   ImageProps,
   ImageStyle,
   ViewStyle,
-} from 'react-native';
-import { ImageCacheService } from '../services/imageCacheService';
+} from "react-native";
+import { ImageCacheService } from "../services/imageCacheService";
 
-interface CachedImageProps extends Omit<ImageProps, 'source'> {
+interface CachedImageProps extends Omit<ImageProps, "source"> {
   source: { uri: string };
   eventId?: string;
   placeholder?: React.ReactNode;
   errorPlaceholder?: React.ReactNode;
   showLoadingIndicator?: boolean;
   loadingIndicatorColor?: string;
-  loadingIndicatorSize?: 'small' | 'large';
+  loadingIndicatorSize?: "small" | "large";
   style?: ImageStyle;
   containerStyle?: ViewStyle;
-  resizeMode?: 'cover' | 'contain' | 'stretch' | 'repeat' | 'center';
+  resizeMode?: "cover" | "contain" | "stretch" | "repeat" | "center";
   onLoadStart?: () => void;
   onLoadEnd?: () => void;
   onError?: () => void;
@@ -28,15 +28,15 @@ interface CachedImageProps extends Omit<ImageProps, 'source'> {
 
 export const CachedImage: React.FC<CachedImageProps> = ({
   source,
-  eventId = 'unknown',
-  placeholder,
+  eventId = "unknown",
+  placeholder: _placeholder,
   errorPlaceholder,
   showLoadingIndicator = true,
-  loadingIndicatorColor = '#007AFF',
-  loadingIndicatorSize = 'large',
+  loadingIndicatorColor = "#007AFF",
+  loadingIndicatorSize = "large",
   style,
   containerStyle,
-  resizeMode = 'cover',
+  resizeMode = "cover",
   onLoadStart,
   onLoadEnd,
   onError,
@@ -59,7 +59,7 @@ export const CachedImage: React.FC<CachedImageProps> = ({
     const checkCacheAndReplace = async () => {
       try {
         const cachedPath = await ImageCacheService.isImageCached(source.uri);
-        
+
         if (isMounted && cachedPath) {
           // Remplacer par l'image en cache si elle existe
           setImageSource({ uri: cachedPath });
@@ -69,12 +69,14 @@ export const CachedImage: React.FC<CachedImageProps> = ({
           onLoadEnd?.();
         } else if (isMounted && !cachedPath) {
           // Pas en cache, télécharger en arrière-plan pour la prochaine fois
-          ImageCacheService.cacheImage(source.uri, eventId).catch(error => {
-            console.log(`⚠️ Échec du cache d'image en arrière-plan: ${error.message}`);
+          ImageCacheService.cacheImage(source.uri, eventId).catch((error) => {
+            console.log(
+              `⚠️ Échec du cache d'image en arrière-plan: ${error.message}`,
+            );
           });
         }
       } catch (error) {
-        console.error('❌ Erreur lors de la vérification du cache:', error);
+        console.error("❌ Erreur lors de la vérification du cache:", error);
       }
     };
 
@@ -96,8 +98,6 @@ export const CachedImage: React.FC<CachedImageProps> = ({
     setIsLoading(false);
     onError?.();
   };
-
-
 
   // Afficher le placeholder d'erreur si l'image a échoué
   if (hasError) {
@@ -124,12 +124,12 @@ export const CachedImage: React.FC<CachedImageProps> = ({
           onError={handleImageError}
         />
       )}
-      
+
       {isLoading && showLoadingIndicator && (
         <View style={styles.loadingOverlay}>
-          <ActivityIndicator 
-            size={loadingIndicatorSize} 
-            color={loadingIndicatorColor} 
+          <ActivityIndicator
+            size={loadingIndicatorSize}
+            color={loadingIndicatorColor}
           />
         </View>
       )}
@@ -139,39 +139,39 @@ export const CachedImage: React.FC<CachedImageProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    position: 'relative',
-    overflow: 'hidden',
+    position: "relative",
+    overflow: "hidden",
   },
   image: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f0f0f0',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f0f0f0",
   },
   loadingOverlay: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(240, 240, 240, 0.8)',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(240, 240, 240, 0.8)",
   },
   errorContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f0f0f0',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f0f0f0",
   },
   errorPlaceholder: {
     width: 50,
     height: 50,
-    backgroundColor: '#ccc',
+    backgroundColor: "#ccc",
     borderRadius: 25,
   },
-}); 
+});

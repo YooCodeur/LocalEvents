@@ -52,17 +52,20 @@ export const loadEventsFromCache = createAsyncThunk(
 // Actions asynchrones avec intégration API et cache
 export const fetchEvents = createAsyncThunk(
   "events/fetchEvents",
-  async (params: SearchParams & { forceRefresh?: boolean }, { rejectWithValue, dispatch }) => {
+  async (
+    params: SearchParams & { forceRefresh?: boolean },
+    { rejectWithValue, dispatch: _dispatch },
+  ) => {
     try {
       // Si ce n'est pas un refresh forcé, essayer d'abord le cache
       if (!params.forceRefresh) {
         const cachedEvents = await CacheService.getCachedEvents(params);
         if (cachedEvents) {
           console.log("📦 Événements chargés depuis le cache");
-          return { 
-            events: cachedEvents, 
-            searchParams: params, 
-            fromCache: true 
+          return {
+            events: cachedEvents,
+            searchParams: params,
+            fromCache: true,
           };
         }
       }
@@ -70,16 +73,18 @@ export const fetchEvents = createAsyncThunk(
       // Charger depuis l'API
       const { EventsService } = await import("../../services");
       const events = await EventsService.getEventsByCity(params);
-      
+
       // Sauvegarder en cache
-      const ttl = params.keyword ? CACHE_CONFIG.SEARCH_TTL : CACHE_CONFIG.DEFAULT_TTL;
+      const ttl = params.keyword
+        ? CACHE_CONFIG.SEARCH_TTL
+        : CACHE_CONFIG.DEFAULT_TTL;
       await CacheService.cacheEvents(events, params, ttl);
-      
+
       console.log("🌐 Événements chargés depuis l'API et mis en cache");
-      return { 
-        events, 
-        searchParams: params, 
-        fromCache: false 
+      return {
+        events,
+        searchParams: params,
+        fromCache: false,
       };
     } catch (error: unknown) {
       return rejectWithValue(
@@ -91,17 +96,20 @@ export const fetchEvents = createAsyncThunk(
 
 export const searchEvents = createAsyncThunk(
   "events/searchEvents",
-  async (params: SearchParams & { forceRefresh?: boolean }, { rejectWithValue }) => {
+  async (
+    params: SearchParams & { forceRefresh?: boolean },
+    { rejectWithValue },
+  ) => {
     try {
       // Si ce n'est pas un refresh forcé, essayer d'abord le cache
       if (!params.forceRefresh) {
         const cachedEvents = await CacheService.getCachedEvents(params);
         if (cachedEvents) {
           console.log("📦 Recherche chargée depuis le cache");
-          return { 
-            events: cachedEvents, 
-            searchParams: params, 
-            fromCache: true 
+          return {
+            events: cachedEvents,
+            searchParams: params,
+            fromCache: true,
           };
         }
       }
@@ -109,15 +117,15 @@ export const searchEvents = createAsyncThunk(
       // Rechercher depuis l'API
       const { EventsService } = await import("../../services");
       const events = await EventsService.searchEvents(params);
-      
+
       // Sauvegarder en cache avec TTL plus court pour les recherches
       await CacheService.cacheEvents(events, params, CACHE_CONFIG.SEARCH_TTL);
-      
+
       console.log("🌐 Recherche depuis l'API et mise en cache");
-      return { 
-        events, 
-        searchParams: params, 
-        fromCache: false 
+      return {
+        events,
+        searchParams: params,
+        fromCache: false,
       };
     } catch (error: unknown) {
       return rejectWithValue(
@@ -198,13 +206,13 @@ export const eventsSlice = createSlice({
       .addCase(fetchEvents.fulfilled, (state, action) => {
         state.loading = false;
         const { events, fromCache } = action.payload;
-        
+
         if (action.meta.arg.page === 0) {
           state.events = events;
         } else {
           state.events.push(...events);
         }
-        
+
         state.page = action.meta.arg.page || 0;
         state.hasMore = events.length === (action.meta.arg.size || 20);
         state.isFromCache = fromCache;
@@ -217,7 +225,7 @@ export const eventsSlice = createSlice({
           (action.payload as string) ||
           action.error.message ||
           "Erreur lors du chargement des événements";
-        
+
         // En cas d'erreur, marquer comme mode offline potentiel
         state.isOfflineMode = true;
       })
@@ -229,7 +237,7 @@ export const eventsSlice = createSlice({
       .addCase(searchEvents.fulfilled, (state, action) => {
         state.loading = false;
         const { events, fromCache } = action.payload;
-        
+
         state.events = events;
         state.page = 0;
         state.hasMore = events.length === (action.meta.arg.size || 20);
@@ -243,17 +251,17 @@ export const eventsSlice = createSlice({
           (action.payload as string) ||
           action.error.message ||
           "Erreur lors de la recherche";
-        
+
         // En cas d'erreur, marquer comme mode offline potentiel
         state.isOfflineMode = true;
       });
   },
 });
 
-export const { 
-  setSearchParams, 
-  clearEvents, 
-  clearError, 
-  setOfflineMode, 
-  markAsFromCache 
+export const {
+  setSearchParams,
+  clearEvents,
+  clearError,
+  setOfflineMode,
+  markAsFromCache,
 } = eventsSlice.actions;

@@ -41,16 +41,16 @@ const CameraScreen = () => {
     if (permission?.granted) {
       // Délai court pour laisser le temps aux permissions de se propager sur iOS
       const timeoutId = setTimeout(() => {
-        setCameraKey(prev => prev + 1);
+        setCameraKey((prev) => prev + 1);
       }, 150);
-      
+
       return () => clearTimeout(timeoutId);
     }
   }, [permission?.granted]);
 
   // Fonction pour rafraîchir manuellement la caméra si elle reste noire
   const refreshCamera = () => {
-    setCameraKey(prev => prev + 1);
+    setCameraKey((prev) => prev + 1);
   };
 
   const toggleCameraFacing = () => {
@@ -150,7 +150,8 @@ const CameraScreen = () => {
           <Ionicons name="camera-outline" size={120} color="#007AFF" />
           <Text style={styles.permissionTitle}>Accès à la caméra requis</Text>
           <Text style={styles.permissionText}>
-            Cette application a besoin d'accéder à votre caméra pour prendre des photos.
+            Cette application a besoin d'accéder à votre caméra pour prendre des
+            photos.
           </Text>
           <TouchableOpacity
             style={styles.permissionButton}
@@ -167,11 +168,11 @@ const CameraScreen = () => {
   return (
     <View style={styles.container}>
       {/* Caméra PLEIN ÉCRAN avec clé pour forcer le re-render */}
-      <CameraView 
+      <CameraView
         key={cameraKey}
-        ref={cameraRef} 
-        style={styles.camera} 
-        facing={facing} 
+        ref={cameraRef}
+        style={styles.camera}
+        facing={facing}
       />
 
       {/* Overlay avec contrôles */}

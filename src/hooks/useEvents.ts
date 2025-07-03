@@ -14,17 +14,17 @@ import type { SearchParams } from "../types/api";
 
 export const useEvents = () => {
   const dispatch = useAppDispatch();
-  const { 
-    events, 
-    loading, 
-    error, 
-    searchParams, 
-    hasMore, 
-    isFromCache, 
-    lastCacheUpdate, 
-    isOfflineMode 
+  const {
+    events,
+    loading,
+    error,
+    searchParams,
+    hasMore,
+    isFromCache,
+    lastCacheUpdate,
+    isOfflineMode,
   } = useAppSelector((state) => state.events);
-  
+
   const hasInternetAccess = useHasInternetAccess();
   const isOffline = useIsOffline();
 
@@ -37,7 +37,7 @@ export const useEvents = () => {
   const loadEvents = useCallback(
     (params?: Partial<SearchParams> & { forceRefresh?: boolean }) => {
       const finalParams = { ...searchParams, ...params };
-      
+
       // Si on est offline, essayer de charger depuis le cache
       if (isOffline && !params?.forceRefresh) {
         dispatch(loadEventsFromCache(finalParams));
@@ -51,7 +51,7 @@ export const useEvents = () => {
   // Actualiser les événements (pull-to-refresh)
   const refreshEvents = useCallback(() => {
     dispatch(clearError());
-    
+
     // Si on est offline, charger depuis le cache
     if (isOffline) {
       dispatch(loadEventsFromCache({ ...searchParams, page: 0 }));

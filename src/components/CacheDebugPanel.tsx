@@ -76,7 +76,7 @@ export const CacheDebugPanel: React.FC = () => {
             }
           },
         },
-      ]
+      ],
     );
   };
 
@@ -97,10 +97,10 @@ export const CacheDebugPanel: React.FC = () => {
         <Ionicons name="analytics-outline" size={20} color="#3498db" />
         <Text style={styles.title}>Cache Debug Panel</Text>
         <TouchableOpacity onPress={loadStats} disabled={loading}>
-          <Ionicons 
-            name="refresh" 
-            size={20} 
-            color={loading ? "#bdc3c7" : "#3498db"} 
+          <Ionicons
+            name="refresh"
+            size={20}
+            color={loading ? "#bdc3c7" : "#3498db"}
           />
         </TouchableOpacity>
       </View>
@@ -109,7 +109,7 @@ export const CacheDebugPanel: React.FC = () => {
         {/* Statistiques */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>📊 Statistiques</Text>
-          
+
           <View style={styles.statRow}>
             <Text style={styles.statLabel}>Entrées en cache:</Text>
             <Text style={styles.statValue}>{stats.totalEntries}</Text>
@@ -123,10 +123,9 @@ export const CacheDebugPanel: React.FC = () => {
           <View style={styles.statRow}>
             <Text style={styles.statLabel}>Dernier nettoyage:</Text>
             <Text style={styles.statValue}>
-              {stats.lastCleanup 
+              {stats.lastCleanup
                 ? stats.lastCleanup.toLocaleString("fr-FR")
-                : "Jamais"
-              }
+                : "Jamais"}
             </Text>
           </View>
         </View>
@@ -134,13 +133,13 @@ export const CacheDebugPanel: React.FC = () => {
         {/* Actions */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>🔧 Actions</Text>
-          
+
           <TouchableOpacity
             style={[styles.button, styles.cleanupButton]}
             onPress={handleCleanup}
             disabled={loading}
           >
-            <Ionicons name="broom-outline" size={18} color="#fff" />
+            <Ionicons name="brush" size={18} color="#fff" />
             <Text style={styles.buttonText}>Nettoyer le cache</Text>
           </TouchableOpacity>
 
@@ -163,9 +162,7 @@ export const CacheDebugPanel: React.FC = () => {
           <Text style={styles.infoText}>
             • Les recherches expirent après 1h
           </Text>
-          <Text style={styles.infoText}>
-            • Maximum 10 entrées en cache
-          </Text>
+          <Text style={styles.infoText}>• Maximum 10 entrées en cache</Text>
           <Text style={styles.infoText}>
             • Nettoyage automatique toutes les 6h
           </Text>
@@ -259,4 +256,4 @@ const styles = StyleSheet.create({
     color: "#7f8c8d",
     marginVertical: 2,
   },
-}); 
+});

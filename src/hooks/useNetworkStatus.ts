@@ -20,11 +20,11 @@ export const useNetworkStatus = (): NetworkStatus => {
   useEffect(() => {
     // Pour l'instant, nous simulons une détection de réseau basique
     // Dans une implémentation complète, vous devriez utiliser @react-native-netinfo
-    
+
     if (Platform.OS === "web") {
       // Sur le web, on peut utiliser navigator.onLine
       const updateOnlineStatus = () => {
-        setNetworkStatus(prev => ({
+        setNetworkStatus((prev) => ({
           ...prev,
           isConnected: navigator.onLine,
           isInternetReachable: navigator.onLine,
@@ -44,7 +44,9 @@ export const useNetworkStatus = (): NetworkStatus => {
     } else {
       // Sur mobile, pour l'instant on assume qu'on est connecté
       // TODO: Implémenter avec @react-native-netinfo
-      console.log("📱 Détection réseau mobile: utilisez @react-native-netinfo pour une implémentation complète");
+      console.log(
+        "📱 Détection réseau mobile: utilisez @react-native-netinfo pour une implémentation complète",
+      );
     }
   }, []);
 
@@ -60,5 +62,5 @@ export const useIsOffline = (): boolean => {
 // Hook utilitaire pour vérifier si on a accès à Internet
 export const useHasInternetAccess = (): boolean => {
   const { isConnected, isInternetReachable } = useNetworkStatus();
-  return isConnected && (isInternetReachable !== false);
-}; 
+  return isConnected && isInternetReachable !== false;
+};

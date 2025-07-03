@@ -34,15 +34,15 @@ export default function EventsScreen() {
   const navigation = useNavigation<NavigationProp>();
 
   // Hooks personnalisés
-  const { 
-    events, 
-    loading, 
-    error, 
-    refreshEvents, 
-    loadEvents, 
-    isFromCache, 
-    lastCacheUpdate, 
-    isOfflineMode 
+  const {
+    events,
+    loading,
+    error,
+    refreshEvents,
+    loadEvents,
+    isFromCache,
+    lastCacheUpdate,
+    isOfflineMode,
   } = useEvents();
   const { toggleFavorite, isFavorite } = useFavorites();
 

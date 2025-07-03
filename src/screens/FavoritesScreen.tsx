@@ -89,9 +89,9 @@ export default function FavoritesScreen() {
         onPress={() => handleEventPress(item)}
         activeOpacity={0.7}
       >
-        <CachedImage 
-          source={{ uri: item.imageUrl }} 
-          style={styles.favoriteImage} 
+        <CachedImage
+          source={{ uri: item.imageUrl }}
+          style={styles.favoriteImage}
           eventId={item.id}
           loadingIndicatorSize="small"
           resizeMode="cover"

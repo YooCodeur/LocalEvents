@@ -34,8 +34,8 @@ export const EventCard = memo<EventCardProps>(
         onPress={handlePress}
         activeOpacity={0.7}
       >
-        <CachedImage 
-          source={{ uri: event.imageUrl }} 
+        <CachedImage
+          source={{ uri: event.imageUrl }}
           style={styles.image}
           eventId={event.id}
           loadingIndicatorSize="small"

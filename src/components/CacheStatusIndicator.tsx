@@ -7,71 +7,67 @@ interface CacheStatusIndicatorProps {
   isOfflineMode: boolean;
   lastCacheUpdate: number | null;
   onRefresh?: () => void;
-  style?: any;
+  style?: object;
 }
 
-export const CacheStatusIndicator = memo<CacheStatusIndicatorProps>(({
-  isFromCache,
-  isOfflineMode,
-  lastCacheUpdate,
-  onRefresh,
-  style,
-}) => {
-  // Ne rien afficher si on n'est pas en mode cache/offline
-  if (!isFromCache && !isOfflineMode) {
-    return null;
-  }
+export const CacheStatusIndicator = memo<CacheStatusIndicatorProps>(
+  ({
+    isFromCache,
+    isOfflineMode,
+    lastCacheUpdate: _lastCacheUpdate,
+    onRefresh,
+    style,
+  }) => {
+    // Ne rien afficher si on n'est pas en mode cache/offline
+    if (!isFromCache && !isOfflineMode) {
+      return null;
+    }
 
-
-
-  const renderOfflineIndicator = () => (
-    <View style={[styles.container, styles.offlineContainer, style]}>
-      <View style={styles.iconContainer}>
-        <Ionicons name="cloud-offline-outline" size={16} color="#f39c12" />
+    const renderOfflineIndicator = () => (
+      <View style={[styles.container, styles.offlineContainer, style]}>
+        <View style={styles.iconContainer}>
+          <Ionicons name="cloud-offline-outline" size={16} color="#f39c12" />
+        </View>
+        <View style={styles.textContainer}>
+          <Text style={styles.title}>Mode hors ligne</Text>
+          <Text style={styles.subtitle}>Données disponibles localement</Text>
+        </View>
+        {onRefresh && (
+          <TouchableOpacity
+            onPress={onRefresh}
+            style={styles.refreshButton}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Ionicons name="refresh-outline" size={16} color="#f39c12" />
+          </TouchableOpacity>
+        )}
       </View>
-      <View style={styles.textContainer}>
-        <Text style={styles.title}>Mode hors ligne</Text>
-        <Text style={styles.subtitle}>
-          Données disponibles localement
-        </Text>
-      </View>
-      {onRefresh && (
-        <TouchableOpacity 
-          onPress={onRefresh} 
-          style={styles.refreshButton}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-        >
-          <Ionicons name="refresh-outline" size={16} color="#f39c12" />
-        </TouchableOpacity>
-      )}
-    </View>
-  );
+    );
 
-  const renderCacheIndicator = () => (
-    <View style={[styles.container, styles.cacheContainer, style]}>
-      <View style={styles.iconContainer}>
-        <Ionicons name="archive-outline" size={16} color="#3498db" />
+    const renderCacheIndicator = () => (
+      <View style={[styles.container, styles.cacheContainer, style]}>
+        <View style={styles.iconContainer}>
+          <Ionicons name="archive-outline" size={16} color="#3498db" />
+        </View>
+        <View style={styles.textContainer}>
+          <Text style={styles.title}>Données en cache</Text>
+          <Text style={styles.subtitle}>Tirez pour actualiser</Text>
+        </View>
+        {onRefresh && (
+          <TouchableOpacity
+            onPress={onRefresh}
+            style={styles.refreshButton}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Ionicons name="refresh-outline" size={16} color="#3498db" />
+          </TouchableOpacity>
+        )}
       </View>
-      <View style={styles.textContainer}>
-        <Text style={styles.title}>Données en cache</Text>
-        <Text style={styles.subtitle}>
-          Tirez pour actualiser
-        </Text>
-      </View>
-      {onRefresh && (
-        <TouchableOpacity 
-          onPress={onRefresh} 
-          style={styles.refreshButton}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-        >
-          <Ionicons name="refresh-outline" size={16} color="#3498db" />
-        </TouchableOpacity>
-      )}
-    </View>
-  );
+    );
 
-  return isOfflineMode ? renderOfflineIndicator() : renderCacheIndicator();
-});
+    return isOfflineMode ? renderOfflineIndicator() : renderCacheIndicator();
+  },
+);
 
 CacheStatusIndicator.displayName = "CacheStatusIndicator";
 
@@ -100,8 +96,7 @@ const styles = StyleSheet.create({
   },
   cacheContainer: {
     backgroundColor: "#f0f8ff", // Light blue background
-    borderLeftWidth: 3,
-    borderLeftColor: "#3498db",
+  
   },
   iconContainer: {
     marginRight: 8,
@@ -123,4 +118,4 @@ const styles = StyleSheet.create({
     padding: 4,
     marginLeft: 8,
   },
-}); 
+});

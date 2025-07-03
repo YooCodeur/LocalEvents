@@ -2,7 +2,7 @@
 export { ticketmasterApi, ApiError, handleApiError } from "./api";
 export { EventsService, transformTicketmasterEvent } from "./eventsService";
 export { CacheService, CACHE_CONFIG } from "./cacheService";
-export * from './imageCacheService';
+export * from "./imageCacheService";
 
 // Configuration API - constantes utiles
 export const API_CONFIG = {
