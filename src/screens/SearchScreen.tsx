@@ -6,16 +6,22 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Alert,
   KeyboardAvoidingView,
   Platform,
+  Dimensions,
 } from "react-native";
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
-import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { Ionicons, MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigation } from "@react-navigation/native";
+import type { CompositeNavigationProp } from "@react-navigation/native";
+import type { StackNavigationProp } from "@react-navigation/stack";
+import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import { RootState, AppDispatch } from "../store";
+import type { RootStackParamList, MainTabParamList } from "../types/navigation";
 import {
   searchEvents,
   setSearchParams,
@@ -23,8 +29,16 @@ import {
 } from "../store/slices/eventsSlice";
 import { SearchParams } from "../types/api";
 
+type NavigationProp = CompositeNavigationProp<
+  BottomTabNavigationProp<MainTabParamList, "Search">,
+  StackNavigationProp<RootStackParamList>
+>;
+
+const { height } = Dimensions.get("window");
+
 export default function SearchScreen() {
   const dispatch = useDispatch<AppDispatch>();
+  const navigation = useNavigation<NavigationProp>();
   const { searchParams, loading } = useSelector(
     (state: RootState) => state.events,
   );
@@ -189,12 +203,9 @@ export default function SearchScreen() {
     dispatch(clearEvents());
     dispatch(searchEvents(params));
 
-    Alert.alert(
-      "Recherche lancée",
-      `Recherche ${keyword ? `"${keyword}"` : "tous événements"} à ${city}`,
-      [{ text: "OK" }],
-    );
-  }, [dispatch, keyword, city, startDate, endDate]);
+    // Rediriger vers l'onglet Events pour voir les résultats
+    navigation.navigate("MainTabs", { screen: "Events" });
+  }, [dispatch, keyword, city, startDate, endDate, navigation]);
 
   // Réinitialiser les filtres
   const handleReset = useCallback(() => {
@@ -223,318 +234,367 @@ export default function SearchScreen() {
     setKeyword(selectedKeyword);
   }, []);
 
-  return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+  // Section Hero décorative
+  const renderHeroSection = () => (
+    <LinearGradient
+      colors={["#667eea", "#764ba2", "#f093fb"]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={[styles.heroSection, { height: height * 0.35 }]}
     >
-      <ScrollView
-        style={styles.scrollContainer}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
+      {/* Éléments décoratifs flottants */}
+      <View style={styles.floatingElements}>
+        <View style={[styles.floatingIcon, styles.icon1]}>
+          <Ionicons name="search" size={28} color="rgba(255,255,255,0.3)" />
+        </View>
+        <View style={[styles.floatingIcon, styles.icon2]}>
+          <MaterialIcons
+            name="location-on"
+            size={26}
+            color="rgba(255,255,255,0.4)"
+          />
+        </View>
+        <View style={[styles.floatingIcon, styles.icon3]}>
+          <Ionicons name="calendar" size={24} color="rgba(255,255,255,0.3)" />
+        </View>
+        <View style={[styles.floatingIcon, styles.icon4]}>
+          <FontAwesome5 name="filter" size={22} color="rgba(255,255,255,0.3)" />
+        </View>
+        <View style={[styles.floatingIcon, styles.icon5]}>
+          <MaterialIcons
+            name="event-available"
+            size={30}
+            color="rgba(255,255,255,0.4)"
+          />
+        </View>
+      </View>
+
+      {/* Contenu principal */}
+      <View style={styles.heroContent}>
+        <View style={styles.heroTextContainer}>
+          <Text style={styles.heroTitle}>Trouvez</Text>
+          <Text style={styles.heroSubtitle}>votre événement</Text>
+          <Text style={styles.heroSubtitle}>idéal</Text>
+        </View>
+
+        <Text style={styles.heroDescription}>
+          Utilisez nos filtres pour découvrir des événements qui vous
+          correspondent
+        </Text>
+      </View>
+
+      {/* Vague décorative en bas */}
+      <View style={styles.wave} />
+    </LinearGradient>
+  );
+
+  return (
+    <View style={styles.container}>
+      <KeyboardAvoidingView
+        style={styles.keyboardContainer}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        {/* En-tête */}
-        <View style={styles.header}>
-          <View style={styles.titleContainer}>
-            <Ionicons
-              name="search"
-              size={32}
-              color="#007AFF"
-              style={styles.titleIcon}
+        <ScrollView
+          style={styles.scrollContainer}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Section Hero */}
+          {renderHeroSection()}
+
+          {/* Mot-clé de recherche */}
+          <View style={[styles.section, styles.firstSection]}>
+            <Text style={styles.sectionTitle}>Mot-clé (optionnel)</Text>
+            <TextInput
+              style={styles.textInput}
+              placeholder="Ex: concert, théâtre, rock..."
+              value={keyword}
+              onChangeText={setKeyword}
+              autoCapitalize="none"
+              autoCorrect={false}
+              returnKeyType="search"
+              onSubmitEditing={handleSearch}
             />
-            <Text style={styles.title}>Recherche d'événements</Text>
-          </View>
-          <Text style={styles.subtitle}>
-            Trouvez des événements par ville, dates ou mots-clés
-          </Text>
-        </View>
 
-        {/* Mot-clé de recherche */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Mot-clé (optionnel)</Text>
-          <TextInput
-            style={styles.textInput}
-            placeholder="Ex: concert, théâtre, rock..."
-            value={keyword}
-            onChangeText={setKeyword}
-            autoCapitalize="none"
-            autoCorrect={false}
-            returnKeyType="search"
-            onSubmitEditing={handleSearch}
-          />
-
-          {/* Suggestions de mots-clés */}
-          <Text style={styles.suggestionsTitle}>Suggestions populaires :</Text>
-          <View style={styles.suggestionsContainer}>
-            {popularKeywords.map((item) => (
-              <TouchableOpacity
-                key={item}
-                style={[
-                  styles.suggestionChip,
-                  keyword === item && styles.suggestionChipSelected,
-                ]}
-                onPress={() => selectKeyword(item)}
-              >
-                <Text
+            {/* Suggestions de mots-clés */}
+            <Text style={styles.suggestionsTitle}>
+              Suggestions populaires :
+            </Text>
+            <View style={styles.suggestionsContainer}>
+              {popularKeywords.map((item) => (
+                <TouchableOpacity
+                  key={item}
                   style={[
-                    styles.suggestionText,
-                    keyword === item && styles.suggestionTextSelected,
+                    styles.suggestionChip,
+                    keyword === item && styles.suggestionChipSelected,
                   ]}
+                  onPress={() => selectKeyword(item)}
                 >
-                  {item}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <Text
+                    style={[
+                      styles.suggestionText,
+                      keyword === item && styles.suggestionTextSelected,
+                    ]}
+                  >
+                    {item}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
-        </View>
 
-        {/* Ville */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Ville</Text>
-          <TextInput
-            style={styles.textInput}
-            placeholder="Ex: Paris, Lyon, Marseille..."
-            value={city}
-            onChangeText={setCity}
-            autoCapitalize="words"
-            autoCorrect={false}
-            returnKeyType="search"
-            onSubmitEditing={handleSearch}
-          />
+          {/* Ville */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Ville</Text>
+            <TextInput
+              style={styles.textInput}
+              placeholder="Ex: Paris, Lyon, Marseille..."
+              value={city}
+              onChangeText={setCity}
+              autoCapitalize="words"
+              autoCorrect={false}
+              returnKeyType="search"
+              onSubmitEditing={handleSearch}
+            />
 
-          {/* Suggestions de villes */}
-          <Text style={styles.suggestionsTitle}>Villes populaires :</Text>
-          <View style={styles.suggestionsContainer}>
-            {popularCities.map((item) => (
-              <TouchableOpacity
-                key={item}
-                style={[
-                  styles.suggestionChip,
-                  city === item && styles.suggestionChipSelected,
-                ]}
-                onPress={() => selectCity(item)}
-              >
-                <Text
+            {/* Suggestions de villes */}
+            <Text style={styles.suggestionsTitle}>Villes populaires :</Text>
+            <View style={styles.suggestionsContainer}>
+              {popularCities.map((item) => (
+                <TouchableOpacity
+                  key={item}
                   style={[
-                    styles.suggestionText,
-                    city === item && styles.suggestionTextSelected,
+                    styles.suggestionChip,
+                    city === item && styles.suggestionChipSelected,
                   ]}
+                  onPress={() => selectCity(item)}
                 >
-                  {item}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <Text
+                    style={[
+                      styles.suggestionText,
+                      city === item && styles.suggestionTextSelected,
+                    ]}
+                  >
+                    {item}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
-        </View>
 
-        {/* Filtres de dates */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Période (optionnel)</Text>
+          {/* Filtres de dates */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Période (optionnel)</Text>
 
-          <View style={styles.dateContainer}>
-            {/* Date de début */}
-            <View style={styles.dateInput}>
-              <Text style={styles.dateLabel}>Date de début :</Text>
-              <TouchableOpacity
-                style={styles.dateButton}
-                onPress={openStartPicker}
-              >
-                <View style={styles.dateButtonContent}>
-                  <Ionicons
-                    name="calendar-outline"
-                    size={20}
-                    color="#007AFF"
-                    style={styles.dateButtonIcon}
-                  />
-                  <Text style={styles.dateButtonText}>
-                    {startDate
-                      ? formatDateForDisplay(startDate)
-                      : "Sélectionner une date"}
-                  </Text>
-                </View>
-              </TouchableOpacity>
+            <View style={styles.dateContainer}>
+              {/* Date de début */}
+              <View style={styles.dateInput}>
+                <Text style={styles.dateLabel}>Date de début :</Text>
+                <TouchableOpacity
+                  style={styles.dateButton}
+                  onPress={openStartPicker}
+                >
+                  <View style={styles.dateButtonContent}>
+                    <Ionicons
+                      name="calendar-outline"
+                      size={20}
+                      color="#007AFF"
+                      style={styles.dateButtonIcon}
+                    />
+                    <Text style={styles.dateButtonText}>
+                      {startDate
+                        ? formatDateForDisplay(startDate)
+                        : "Sélectionner une date"}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
 
-              {showStartPicker && (
-                <View>
-                  <DateTimePicker
-                    value={
-                      Platform.OS === "ios"
-                        ? tempStartDate || startDate || new Date()
-                        : startDate || new Date()
-                    }
-                    mode="date"
-                    display={Platform.OS === "ios" ? "spinner" : "default"}
-                    onChange={onStartDateChange}
-                    minimumDate={new Date()}
-                  />
+                {showStartPicker && (
+                  <View>
+                    <DateTimePicker
+                      value={
+                        Platform.OS === "ios"
+                          ? tempStartDate || startDate || new Date()
+                          : startDate || new Date()
+                      }
+                      mode="date"
+                      display={Platform.OS === "ios" ? "spinner" : "default"}
+                      onChange={onStartDateChange}
+                      minimumDate={new Date()}
+                    />
 
-                  {/* Boutons de confirmation pour iOS */}
-                  {Platform.OS === "ios" && (
-                    <View style={styles.confirmButtonsContainer}>
-                      <TouchableOpacity
-                        style={styles.cancelButton}
-                        onPress={cancelStartDate}
-                      >
-                        <Text style={styles.cancelButtonText}>Annuler</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={styles.confirmButton}
-                        onPress={confirmStartDate}
-                      >
-                        <Text style={styles.confirmButtonText}>Confirmer</Text>
-                      </TouchableOpacity>
-                    </View>
-                  )}
-                </View>
-              )}
-            </View>
-
-            {/* Date de fin */}
-            <View style={styles.dateInput}>
-              <Text style={styles.dateLabel}>Date de fin :</Text>
-              <TouchableOpacity
-                style={styles.dateButton}
-                onPress={openEndPicker}
-              >
-                <View style={styles.dateButtonContent}>
-                  <Ionicons
-                    name="calendar-outline"
-                    size={20}
-                    color="#007AFF"
-                    style={styles.dateButtonIcon}
-                  />
-                  <Text style={styles.dateButtonText}>
-                    {endDate
-                      ? formatDateForDisplay(endDate)
-                      : "Sélectionner une date"}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-
-              {showEndPicker && (
-                <View>
-                  <DateTimePicker
-                    value={
-                      Platform.OS === "ios"
-                        ? tempEndDate || endDate || startDate || new Date()
-                        : endDate || startDate || new Date()
-                    }
-                    mode="date"
-                    display={Platform.OS === "ios" ? "spinner" : "default"}
-                    onChange={onEndDateChange}
-                    minimumDate={startDate || new Date()}
-                  />
-
-                  {/* Boutons de confirmation pour iOS */}
-                  {Platform.OS === "ios" && (
-                    <View style={styles.confirmButtonsContainer}>
-                      <TouchableOpacity
-                        style={styles.cancelButton}
-                        onPress={cancelEndDate}
-                      >
-                        <Text style={styles.cancelButtonText}>Annuler</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={styles.confirmButton}
-                        onPress={confirmEndDate}
-                      >
-                        <Text style={styles.confirmButtonText}>Confirmer</Text>
-                      </TouchableOpacity>
-                    </View>
-                  )}
-                </View>
-              )}
-            </View>
-
-            {/* Boutons pour effacer les dates */}
-            {(startDate || endDate) && (
-              <View style={styles.dateActionsContainer}>
-                {startDate && (
-                  <TouchableOpacity
-                    style={styles.clearDateButton}
-                    onPress={() => setStartDate(null)}
-                  >
-                    <View style={styles.clearButtonContent}>
-                      <Ionicons
-                        name="trash-outline"
-                        size={16}
-                        color="#dc3545"
-                      />
-                      <Text style={styles.clearDateText}>Effacer début</Text>
-                    </View>
-                  </TouchableOpacity>
-                )}
-                {endDate && (
-                  <TouchableOpacity
-                    style={styles.clearDateButton}
-                    onPress={() => setEndDate(null)}
-                  >
-                    <View style={styles.clearButtonContent}>
-                      <Ionicons
-                        name="trash-outline"
-                        size={16}
-                        color="#dc3545"
-                      />
-                      <Text style={styles.clearDateText}>Effacer fin</Text>
-                    </View>
-                  </TouchableOpacity>
+                    {/* Boutons de confirmation pour iOS */}
+                    {Platform.OS === "ios" && (
+                      <View style={styles.confirmButtonsContainer}>
+                        <TouchableOpacity
+                          style={styles.cancelButton}
+                          onPress={cancelStartDate}
+                        >
+                          <Text style={styles.cancelButtonText}>Annuler</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.confirmButton}
+                          onPress={confirmStartDate}
+                        >
+                          <Text style={styles.confirmButtonText}>
+                            Confirmer
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  </View>
                 )}
               </View>
-            )}
-          </View>
 
-          <View style={styles.helperContainer}>
-            <Ionicons
-              name="information-circle-outline"
-              size={16}
-              color="#6c757d"
-            />
-            <Text style={styles.dateHelper}>
-              Sélectionnez des dates pour filtrer les événements dans une
-              période précise
-            </Text>
-          </View>
-        </View>
+              {/* Date de fin */}
+              <View style={styles.dateInput}>
+                <Text style={styles.dateLabel}>Date de fin :</Text>
+                <TouchableOpacity
+                  style={styles.dateButton}
+                  onPress={openEndPicker}
+                >
+                  <View style={styles.dateButtonContent}>
+                    <Ionicons
+                      name="calendar-outline"
+                      size={20}
+                      color="#007AFF"
+                      style={styles.dateButtonIcon}
+                    />
+                    <Text style={styles.dateButtonText}>
+                      {endDate
+                        ? formatDateForDisplay(endDate)
+                        : "Sélectionner une date"}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
 
-        {/* Boutons d'action */}
-        <View style={styles.actionsSection}>
-          <TouchableOpacity
-            style={[styles.actionButton, styles.searchButton]}
-            onPress={handleSearch}
-            disabled={loading}
-          >
-            <View style={styles.actionButtonContent}>
+                {showEndPicker && (
+                  <View>
+                    <DateTimePicker
+                      value={
+                        Platform.OS === "ios"
+                          ? tempEndDate || endDate || startDate || new Date()
+                          : endDate || startDate || new Date()
+                      }
+                      mode="date"
+                      display={Platform.OS === "ios" ? "spinner" : "default"}
+                      onChange={onEndDateChange}
+                      minimumDate={startDate || new Date()}
+                    />
+
+                    {/* Boutons de confirmation pour iOS */}
+                    {Platform.OS === "ios" && (
+                      <View style={styles.confirmButtonsContainer}>
+                        <TouchableOpacity
+                          style={styles.cancelButton}
+                          onPress={cancelEndDate}
+                        >
+                          <Text style={styles.cancelButtonText}>Annuler</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.confirmButton}
+                          onPress={confirmEndDate}
+                        >
+                          <Text style={styles.confirmButtonText}>
+                            Confirmer
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  </View>
+                )}
+              </View>
+
+              {/* Boutons pour effacer les dates */}
+              {(startDate || endDate) && (
+                <View style={styles.dateActionsContainer}>
+                  {startDate && (
+                    <TouchableOpacity
+                      style={styles.clearDateButton}
+                      onPress={() => setStartDate(null)}
+                    >
+                      <View style={styles.clearButtonContent}>
+                        <Ionicons
+                          name="trash-outline"
+                          size={16}
+                          color="#dc3545"
+                        />
+                        <Text style={styles.clearDateText}>Effacer début</Text>
+                      </View>
+                    </TouchableOpacity>
+                  )}
+                  {endDate && (
+                    <TouchableOpacity
+                      style={styles.clearDateButton}
+                      onPress={() => setEndDate(null)}
+                    >
+                      <View style={styles.clearButtonContent}>
+                        <Ionicons
+                          name="trash-outline"
+                          size={16}
+                          color="#dc3545"
+                        />
+                        <Text style={styles.clearDateText}>Effacer fin</Text>
+                      </View>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              )}
+            </View>
+
+            <View style={styles.helperContainer}>
               <Ionicons
-                name={loading ? "hourglass-outline" : "search"}
-                size={20}
-                color="#fff"
-                style={styles.actionButtonIcon}
+                name="information-circle-outline"
+                size={16}
+                color="#6c757d"
               />
-              <Text style={styles.actionButtonText}>
-                {loading ? "Recherche..." : "Rechercher"}
+              <Text style={styles.dateHelper}>
+                Sélectionnez des dates pour filtrer les événements dans une
+                période précise
               </Text>
             </View>
-          </TouchableOpacity>
+          </View>
 
-          <TouchableOpacity
-            style={[styles.actionButton, styles.resetButton]}
-            onPress={handleReset}
-            disabled={loading}
-          >
-            <View style={styles.actionButtonContent}>
-              <Ionicons
-                name="refresh-outline"
-                size={20}
-                color="#6c757d"
-                style={styles.actionButtonIcon}
-              />
-              <Text style={styles.resetButtonText}>Réinitialiser</Text>
-            </View>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+          {/* Boutons d'action */}
+          <View style={styles.actionsSection}>
+            <TouchableOpacity
+              style={[styles.actionButton, styles.searchButton]}
+              onPress={handleSearch}
+              disabled={loading}
+            >
+              <View style={styles.actionButtonContent}>
+                <Ionicons
+                  name={loading ? "hourglass-outline" : "search"}
+                  size={20}
+                  color="#fff"
+                  style={styles.actionButtonIcon}
+                />
+                <Text style={styles.actionButtonText}>
+                  {loading ? "Recherche..." : "Rechercher"}
+                </Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.actionButton, styles.resetButton]}
+              onPress={handleReset}
+              disabled={loading}
+            >
+              <View style={styles.actionButtonContent}>
+                <Ionicons
+                  name="refresh-outline"
+                  size={20}
+                  color="#6c757d"
+                  style={styles.actionButtonIcon}
+                />
+                <Text style={styles.resetButtonText}>Réinitialiser</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
@@ -543,35 +603,23 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f8f9fa",
   },
+  keyboardContainer: {
+    flex: 1,
+  },
   scrollContainer: {
     flex: 1,
   },
   scrollContent: {
-    padding: 20,
+    flexGrow: 1,
     paddingBottom: 40,
   },
-  header: {
-    marginBottom: 24,
-    alignItems: "center",
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#212529",
-    marginBottom: 8,
-    textAlign: "center",
-  },
-  subtitle: {
-    fontSize: 16,
-    color: "#6c757d",
-    textAlign: "center",
-    paddingHorizontal: 20,
-  },
+
   section: {
     backgroundColor: "#fff",
     borderRadius: 16,
     padding: 20,
     marginBottom: 20,
+    marginHorizontal: 20,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -580,6 +628,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+  },
+  firstSection: {
+    marginTop: 15,
   },
   sectionTitle: {
     fontSize: 18,
@@ -646,6 +697,7 @@ const styles = StyleSheet.create({
   actionsSection: {
     gap: 12,
     marginBottom: 24,
+    marginHorizontal: 20,
   },
   actionButton: {
     padding: 18,
@@ -725,15 +777,7 @@ const styles = StyleSheet.create({
     color: "#6c757d",
     fontWeight: "500",
   },
-  titleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 8,
-  },
-  titleIcon: {
-    marginRight: 12,
-  },
+
   dateButtonContent: {
     flexDirection: "row",
     alignItems: "center",
@@ -798,5 +842,92 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "600",
+  },
+
+  // Styles pour la section Hero
+  heroSection: {
+    position: "relative",
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "hidden",
+  },
+  floatingElements: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+  },
+  floatingIcon: {
+    position: "absolute",
+    borderRadius: 50,
+    padding: 8,
+    backgroundColor: "rgba(255,255,255,0.1)",
+  },
+  icon1: {
+    top: "20%",
+    left: "15%",
+  },
+  icon2: {
+    top: "30%",
+    right: "20%",
+  },
+  icon3: {
+    top: "60%",
+    left: "10%",
+  },
+  icon4: {
+    top: "50%",
+    right: "15%",
+  },
+  icon5: {
+    top: "40%",
+    right: "50%",
+  },
+  heroContent: {
+    alignItems: "center",
+    zIndex: 2,
+  },
+  heroTextContainer: {
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  heroTitle: {
+    fontSize: 38,
+    fontWeight: "bold",
+    color: "#fff",
+    textAlign: "center",
+    textShadowColor: "rgba(0,0,0,0.3)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+  },
+  heroSubtitle: {
+    fontSize: 24,
+    fontWeight: "600",
+    color: "#fff",
+    textAlign: "center",
+    opacity: 0.9,
+    textShadowColor: "rgba(0,0,0,0.2)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  heroDescription: {
+    fontSize: 16,
+    color: "#fff",
+    textAlign: "center",
+    opacity: 0.8,
+    paddingHorizontal: 30,
+    fontWeight: "500",
+    textShadowColor: "rgba(0,0,0,0.2)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  wave: {
+    position: "absolute",
+    bottom: -5,
+    left: 0,
+    right: 0,
+    height: 30,
+    backgroundColor: "#f8f9fa",
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
   },
 });

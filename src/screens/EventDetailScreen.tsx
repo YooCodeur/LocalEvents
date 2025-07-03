@@ -13,15 +13,11 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { EventDetailScreenProps } from "../types/navigation";
 import { RootState, AppDispatch } from "../store";
-import { toggleFavoriteAsync } from "../store/slices/favoritesSlice";
+import {
+  toggleFavoriteAsync,
+  type FavoritesState,
+} from "../store/slices/favoritesSlice";
 import { LocalEvent } from "../types/api";
-
-// Interface pour l'état des favoris
-interface FavoritesState {
-  favorites: LocalEvent[];
-  loading: boolean;
-  error: string | null;
-}
 
 export default function EventDetailScreen({
   route,
@@ -31,8 +27,8 @@ export default function EventDetailScreen({
   const dispatch = useDispatch<AppDispatch>();
 
   const favoritesState = useSelector(
-    (state: RootState) => state.favorites,
-  ) as FavoritesState;
+    (state: RootState) => state.favorites as FavoritesState,
+  );
   const { favorites, loading, error } = favoritesState;
   const [imageLoading, setImageLoading] = useState(true);
 

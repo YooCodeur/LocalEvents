@@ -11,29 +11,32 @@ import {
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import type { CompositeNavigationProp } from "@react-navigation/native";
+import type { StackNavigationProp } from "@react-navigation/stack";
+import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { RootState, AppDispatch } from "../store";
+import type { RootStackParamList, MainTabParamList } from "../types/navigation";
 import {
   loadFavorites,
   removeFavoriteAsync,
   clearError,
+  type FavoritesState,
 } from "../store/slices/favoritesSlice";
 import { LocalEvent } from "../types/api";
 
-// Interface pour l'état des favoris
-interface FavoritesState {
-  favorites: LocalEvent[];
-  loading: boolean;
-  error: string | null;
-}
+type NavigationProp = CompositeNavigationProp<
+  BottomTabNavigationProp<MainTabParamList, "Favorites">,
+  StackNavigationProp<RootStackParamList>
+>;
 
 export default function FavoritesScreen() {
   const dispatch = useDispatch<AppDispatch>();
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp>();
 
-  const favoritesState = useSelector(
-    (state: RootState) => state.favorites,
-  ) as FavoritesState;
-  const { favorites, loading, error } = favoritesState;
+  const { favorites, loading, error } = useSelector(
+    (state: RootState) => state.favorites as FavoritesState,
+  );
 
   // Charger les favoris au démarrage et quand l'écran redevient actif
   useEffect(() => {
@@ -97,7 +100,7 @@ export default function FavoritesScreen() {
               onPress={() => handleRemoveFavorite(item)}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <Text style={styles.removeButtonText}>❌</Text>
+              <Ionicons name="close-circle" size={20} color="#dc3545" />
             </TouchableOpacity>
           </View>
 
@@ -115,7 +118,10 @@ export default function FavoritesScreen() {
           )}
 
           <View style={styles.favoriteTag}>
-            <Text style={styles.favoriteTagText}>❤️ Favori</Text>
+            <View style={styles.favoriteTagContent}>
+              <Ionicons name="heart" size={12} color="#fff" />
+              <Text style={styles.favoriteTagText}>Favori</Text>
+            </View>
           </View>
         </View>
       </TouchableOpacity>
@@ -143,7 +149,10 @@ export default function FavoritesScreen() {
   if (error) {
     return (
       <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>❌ {error}</Text>
+        <View style={styles.errorContainer}>
+          <Ionicons name="alert-circle" size={32} color="#dc3545" />
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
         <TouchableOpacity
           style={styles.retryButton}
           onPress={() => {
@@ -161,7 +170,7 @@ export default function FavoritesScreen() {
   if (favorites.length === 0) {
     return (
       <View style={styles.centerContainer}>
-        <Text style={styles.emptyIcon}>💔</Text>
+        <Ionicons name="heart-dislike" size={64} color="#6c757d" />
         <Text style={styles.emptyText}>Aucun favori sauvegardé</Text>
         <Text style={styles.emptySubtext}>
           Découvrez des événements et ajoutez-les à vos favoris depuis l'onglet
@@ -171,9 +180,12 @@ export default function FavoritesScreen() {
           style={styles.discoverButton}
           onPress={() => navigation.navigate("MainTabs", { screen: "Events" })}
         >
-          <Text style={styles.discoverButtonText}>
-            🎪 Découvrir des événements
-          </Text>
+          <View style={styles.discoverButtonContent}>
+            <MaterialIcons name="event" size={20} color="#fff" />
+            <Text style={styles.discoverButtonText}>
+              Découvrir des événements
+            </Text>
+          </View>
         </TouchableOpacity>
       </View>
     );
@@ -276,9 +288,6 @@ const styles = StyleSheet.create({
   removeButton: {
     padding: 4,
   },
-  removeButtonText: {
-    fontSize: 16,
-  },
   favoriteDate: {
     fontSize: 15,
     color: "#dc3545",
@@ -311,6 +320,11 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 8,
   },
+  favoriteTagContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
   favoriteTagText: {
     color: "#fff",
     fontSize: 11,
@@ -324,15 +338,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#6c757d",
   },
+  errorContainer: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
   errorText: {
     fontSize: 16,
     color: "#dc3545",
     textAlign: "center",
-    marginBottom: 20,
-  },
-  emptyIcon: {
-    fontSize: 64,
-    marginBottom: 16,
+    marginTop: 8,
   },
   emptyText: {
     fontSize: 20,
@@ -340,6 +354,7 @@ const styles = StyleSheet.create({
     color: "#495057",
     textAlign: "center",
     marginBottom: 8,
+    marginTop: 16,
   },
   emptySubtext: {
     fontSize: 16,
@@ -365,6 +380,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 14,
     borderRadius: 12,
+  },
+  discoverButtonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
   discoverButtonText: {
     color: "#fff",
