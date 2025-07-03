@@ -1,23 +1,22 @@
 {
   "expo": {
     "name": "LocalEvents",
-    "slug": "LocalEvents",
+    "slug": "localevents",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSCameraUsageDescription": "Cette application a besoin d'accéder à la caméra pour prendre des photos.",
-        "NSMicrophoneUsageDescription": "Cette application a besoin d'accéder au microphone pour enregistrer des vidéos avec audio.",
-        "NSPhotoLibraryUsageDescription": "Cette application a besoin d'accéder à la galerie photo pour sélectionner des images."
+        "NSCameraUsageDescription": "Cette application a besoin d'accéder à votre caméra pour prendre des photos."
       }
     },
     "android": {
@@ -26,12 +25,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "permissions": [
-        "CAMERA",
-        "RECORD_AUDIO",
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE"
-      ]
+      "permissions": ["android.permission.CAMERA"]
     },
     "web": {
       "favicon": "./assets/favicon.png"

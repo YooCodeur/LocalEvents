@@ -10,6 +10,7 @@
 ## 📱 Aperçu
 
 Application mobile cross-platform (iOS & Android) permettant de :
+
 - 🔍 **Découvrir** les événements locaux via l'API Ticketmaster
 - 🎯 **Filtrer** par dates et mots-clés
 - ❤️ **Sauvegarder** ses événements favoris hors-ligne
@@ -18,12 +19,14 @@ Application mobile cross-platform (iOS & Android) permettant de :
 ## 🚀 Installation et lancement
 
 ### Prérequis
+
 - **Node.js** ≥ 18
 - **npm** ou **yarn**
 - **Expo CLI** (optionnel mais recommandé)
 - **Clé API Ticketmaster** ([obtenir ici](https://developer.ticketmaster.com/))
 
 ### 1. Clone et installation
+
 ```bash
 git clone https://github.com/YooCodeur/LocalEvents.git
 cd LocalEvents
@@ -31,6 +34,7 @@ npm install
 ```
 
 ### 2. Configuration API
+
 ```bash
 # Créer le fichier .env à la racine
 echo "EXPO_PUBLIC_TICKETMASTER_API_KEY=votre_clé_ici" > .env
@@ -40,6 +44,7 @@ echo "EXPO_PUBLIC_TICKETMASTER_BASE_URL=https://app.ticketmaster.com/discovery/v
 > 📋 **Voir [README-ENV.md](README-ENV.md) pour la configuration détaillée**
 
 ### 3. Lancement
+
 ```bash
 # Démarrage du serveur de développement
 npm start
@@ -51,6 +56,7 @@ npm run web      # Web
 ```
 
 ### 4. Scan QR Code
+
 - **Android** : Expo Go app
 - **iOS** : Camera native ou Expo Go
 - **Web** : Ouvre automatiquement le navigateur
@@ -58,6 +64,7 @@ npm run web      # Web
 ## 🏗️ Architecture et choix techniques
 
 ### Stack technique
+
 ```
 📱 Frontend
 ├── React Native 0.79 + TypeScript
@@ -83,6 +90,7 @@ npm run web      # Web
 ```
 
 ### Structure du projet
+
 ```
 src/
 ├── components/          # Composants réutilisables
@@ -111,26 +119,31 @@ src/
 ### Choix architecturaux
 
 #### ✅ **Expo Managed Workflow**
+
 **Pourquoi :** Développement rapide, hot reload, déploiement simplifié
 **Compromis :** Moins de contrôle sur les modules natifs
 **Alternative :** Expo bare workflow si modules natifs spécifiques requis
 
 #### ✅ **Redux Toolkit + AsyncThunk**
+
 **Pourquoi :** State management prévisible, devtools, middleware async
 **Compromis :** Boilerplate initial, courbe d'apprentissage
 **Alternative :** Zustand ou Context API pour projets plus simples
 
 #### ✅ **React Navigation v7**
+
 **Pourquoi :** Navigation native, typage strict, performant
 **Compromis :** Bundle size plus lourd
 **Alternative :** React Router Native pour projets web-first
 
 #### ✅ **AsyncStorage vs SQLite**
+
 **Pourquoi :** Simplicité, pas de setup, sérialisation JSON automatique
 **Compromis :** Pas de requêtes complexes, limité en volume
 **Alternative :** SQLite + react-native-sqlite-storage pour données complexes
 
 #### ✅ **Axios + Retry Logic**
+
 **Pourquoi :** Interceptors, gestion erreurs centralisée, retry automatique
 **Compromis :** Bundle size vs fetch natif
 **Alternative :** Fetch + custom error handling
@@ -138,6 +151,7 @@ src/
 ## 🎯 Fonctionnalités implémentées
 
 ### ✅ Core Features (Specs exercice)
+
 - [x] **API Ticketmaster** - Liste événements avec nom, date, lieu, miniature
 - [x] **Recherche avancée** - Filtres dates et mots-clés
 - [x] **Écran détaillé** - Description, image HD, sauvegarde
@@ -146,6 +160,7 @@ src/
 - [x] **Skeleton loaders** - UX pendant chargement
 
 ### ✅ Améliorations bonus
+
 - [x] **Icônes SVG modernes** - Remplacement emojis par @expo/vector-icons
 - [x] **DateTimePicker iOS optimisé** - Confirmation explicite dates
 - [x] **Interface élégante** - Design system cohérent
@@ -171,6 +186,7 @@ npm run format       # Prettier sur tous les fichiers
 ## 🚀 Déploiement
 
 ### Expo Application Services (EAS)
+
 ```bash
 # Configuration EAS
 npx eas-cli build:configure
@@ -180,6 +196,7 @@ npx eas-cli build --platform all
 ```
 
 ### Build local
+
 ```bash
 # Android APK
 npx expo export --platform android
@@ -192,6 +209,7 @@ npx expo run:ios
 ## 💡 Idées d'améliorations (si plus de temps)
 
 ### 🔥 **Features avancées**
+
 - **🗺️ Géolocalisation** - Événements à proximité automatique
 - **📅 Calendrier natif** - Export vers Calendar iOS/Android
 - **🔔 Notifications push** - Rappels événements favoris
@@ -199,6 +217,7 @@ npx expo run:ios
 - **🎨 Mode sombre** - Support theme dark/light system
 
 ### 🚀 **Performance & UX**
+
 - **📱 Pagination infinie** - Lazy loading événements
 - **💾 Cache intelligent** - SQLite + images mises en cache
 - **🔍 Recherche instantanée** - Debouncing + suggestions temps réel
@@ -206,6 +225,7 @@ npx expo run:ios
 - **🌐 Internationalization** - Support multi-langues i18n
 
 ### 🏗️ **Architecture avancée**
+
 - **🧪 Tests e2e** - Detox pour tests automatisés complets
 - **📈 Performance monitoring** - Flipper + React Native Performance
 - **🔐 Authentification** - Login/register + favoris cloud sync
@@ -213,6 +233,7 @@ npx expo run:ios
 - **🎭 Storybook** - Documentation composants interactifs
 
 ### 🛠️ **DevX & Maintenance**
+
 - **🔄 GraphQL** - Remplacement REST par GraphQL + Apollo
 - **🚦 Feature flags** - A/B testing et rollout progressif
 - **📊 Crash reporting** - Sentry intégration
@@ -222,11 +243,13 @@ npx expo run:ios
 ## 🐛 Problèmes connus
 
 ### iOS DateTimePicker
+
 **Problème :** Interface native parfois confuse
 **Solution :** Boutons confirmation/annulation explicites
 **Workaround :** Possibilité de revenir au modal custom
 
 ### AsyncStorage limitations
+
 **Impact :** Performance si >1000 favoris
 **Solution future :** Migration vers SQLite
 **Monitoring :** Logs performance + alertes
@@ -242,12 +265,9 @@ npx expo run:ios
 ## 🤝 Contributeurs
 
 - **[YooCodeur](https://github.com/YooCodeur)** - Développement principal
-- **Exercice technique** - 48h challenge React Native
 
 ## 📄 Licence
 
 MIT License - Voir [LICENSE](LICENSE) pour plus de détails.
 
 ---
-
-> 💡 **Exercice réalisé en 48h** - Application complète et fonctionnelle respectant toutes les spécifications techniques et fonctionnelles demandées. 

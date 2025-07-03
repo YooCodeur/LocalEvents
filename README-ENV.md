@@ -3,6 +3,7 @@
 ## Pourquoi cette approche ?
 
 ❌ **Problème** : Mettre les clés API directement dans le code est **dangereux** :
+
 - Risque de commit sur GitHub public
 - Clés exposées à tous les développeurs
 - Pas de séparation dev/prod
@@ -33,11 +34,11 @@ npm start
 Expo utilise le préfixe `EXPO_PUBLIC_` pour les variables côté client :
 
 ```javascript
-// ✅ Accessible côté client 
-EXPO_PUBLIC_TICKETMASTER_API_KEY=abc123
+// ✅ Accessible côté client
+EXPO_PUBLIC_TICKETMASTER_API_KEY = abc123;
 
 // ❌ Non accessible côté client (serveur uniquement)
-TICKETMASTER_API_KEY=abc123
+TICKETMASTER_API_KEY = abc123;
 ```
 
 ### Double fallback
@@ -45,9 +46,9 @@ TICKETMASTER_API_KEY=abc123
 Le code vérifie 2 sources :
 
 ```javascript
-const API_KEY = 
-  process.env.EXPO_PUBLIC_TICKETMASTER_API_KEY ||     // Méthode 1
-  Constants.expoConfig?.extra?.TICKETMASTER_API_KEY;  // Méthode 2 (fallback)
+const API_KEY =
+  process.env.EXPO_PUBLIC_TICKETMASTER_API_KEY || // Méthode 1
+  Constants.expoConfig?.extra?.TICKETMASTER_API_KEY; // Méthode 2 (fallback)
 ```
 
 ## 🛡️ Sécurité
@@ -55,6 +56,7 @@ const API_KEY =
 ### Fichier .env protégé
 
 Le `.gitignore` contient :
+
 ```bash
 .env
 .env*.local
@@ -106,4 +108,4 @@ npm install react-native-dotenv
 
 ---
 
-✅ **Résultat** : Clés API sécurisées, code propre, pas de risque de commit de secrets ! 
+✅ **Résultat** : Clés API sécurisées, code propre, pas de risque de commit de secrets !
