@@ -6,7 +6,7 @@ import { LocalEvent } from "../../types/api";
 const FAVORITES_STORAGE_KEY = "@LocalEvents:favorites";
 
 // État initial
-interface FavoritesState {
+export interface FavoritesState {
   favorites: LocalEvent[];
   loading: boolean;
   error: string | null;
