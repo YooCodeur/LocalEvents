@@ -43,12 +43,9 @@ const CameraScreen = () => {
       const timeoutId = setTimeout(() => {
         setCameraKey((prev) => prev + 1);
       }, 150);
-
       return () => clearTimeout(timeoutId);
     }
   }, [permission?.granted]);
-
-
 
   const toggleCameraFacing = () => {
     setFacing((current) => (current === "back" ? "front" : "back"));
@@ -164,7 +161,6 @@ const CameraScreen = () => {
 
   return (
     <View style={styles.container}>
-      {/* Caméra PLEIN ÉCRAN avec clé pour forcer le re-render */}
       <CameraView
         key={cameraKey}
         ref={cameraRef}
@@ -172,9 +168,7 @@ const CameraScreen = () => {
         facing={facing}
       />
 
-      {/* Overlay avec contrôles */}
       <View style={styles.overlay}>
-        {/* Header avec compteur et boutons */}
         <SafeAreaView style={styles.header}>
           <View style={styles.headerLeft}>
             <TouchableOpacity
@@ -194,19 +188,14 @@ const CameraScreen = () => {
             📸 {capturedPhotos.length} photo
             {capturedPhotos.length !== 1 ? "s" : ""}
           </Text>
-
-
         </SafeAreaView>
 
-        {/* Contrôles caméra en bas */}
         <SafeAreaView style={styles.bottomControls}>
           <View style={styles.controls}>
-            {/* Bouton de capture centré */}
             <TouchableOpacity style={styles.captureButton} onPress={takePhoto}>
               <View style={styles.captureButtonInner} />
             </TouchableOpacity>
 
-            {/* Bouton flip caméra à droite */}
             <TouchableOpacity
               style={styles.controlButton}
               onPress={toggleCameraFacing}
@@ -217,7 +206,6 @@ const CameraScreen = () => {
         </SafeAreaView>
       </View>
 
-      {/* Modal Galerie */}
       <Modal
         visible={showGallery}
         animationType="slide"

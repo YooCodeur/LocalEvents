@@ -91,11 +91,9 @@ const styles = StyleSheet.create({
   },
   offlineContainer: {
     backgroundColor: "#fff8dc", // Light yellow background
-
   },
   cacheContainer: {
     backgroundColor: "#f0f8ff", // Light blue background
-  
   },
   iconContainer: {
     marginRight: 8,
@@ -118,3 +116,5 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
 });
+
+export default CacheStatusIndicator;

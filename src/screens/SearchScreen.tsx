@@ -22,8 +22,6 @@ import type { StackNavigationProp } from "@react-navigation/stack";
 import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import { RootState, AppDispatch } from "../store";
 import type { RootStackParamList, MainTabParamList } from "../types/navigation";
-import { COLORS } from "../constants";
-
 import {
   searchEvents,
   setSearchParams,
@@ -546,7 +544,6 @@ export default function SearchScreen() {
             </View>
 
             <View style={styles.helperContainer}>
-          
               <Text style={styles.dateHelper}>
                 Sélectionnez des dates pour filtrer les événements dans une
                 période précise
