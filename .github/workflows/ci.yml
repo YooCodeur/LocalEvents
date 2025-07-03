@@ -36,7 +36,7 @@ jobs:
       - name: Build check (Expo)
         run: |
           npm install -g @expo/cli
-          expo export --platform web --output-dir dist --clear
+          npx expo export --platform web --output-dir dist --clear
         env:
           EXPO_PUBLIC_TICKETMASTER_API_KEY: ${{ secrets.EXPO_PUBLIC_TICKETMASTER_API_KEY }}
 
@@ -63,7 +63,7 @@ jobs:
       - name: 📝 Analyze bundle size (web)
         run: |
           npm install -g @expo/cli
-          expo export --platform web --output-dir dist --clear --minify
+          npx expo export --platform web --output-dir dist --clear --minify
           du -sh dist/
         env:
           EXPO_PUBLIC_TICKETMASTER_API_KEY: demo_key_for_ci 

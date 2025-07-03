@@ -172,7 +172,7 @@ Exemples : `useEvents`, `useFavorites`, `useNetworkStatus`
 - **Stockage local** des photos : Pas de cloud pour cette démo
 - **Interface native** : Contrôles familiers iOS/Android
 
-####  **Optimisations**
+#### **Optimisations**
 
 - **Lazy loading** des images avec cache
 - **Memoization** avec `useCallback`/`useMemo`
@@ -290,7 +290,7 @@ interface CacheStrategy {
 // Background sync
 ```
 
-###  Qualité et tests
+### Qualité et tests
 
 #### **1. Tests complets**
 
@@ -399,4 +399,3 @@ interface CacheStrategy {
 ✅ **Module caméra** : expo-camera avec permissions  
 ✅ **Pull-to-refresh** : Implémenté sur tous les écrans  
 ✅ **Skeleton loaders** : UX fluide pendant chargement
-
