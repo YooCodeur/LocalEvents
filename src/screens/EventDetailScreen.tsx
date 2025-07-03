@@ -30,7 +30,6 @@ export default function EventDetailScreen({
     (state: RootState) => state.favorites as FavoritesState,
   );
   const { favorites, loading, error } = favoritesState;
-  const [imageLoading, setImageLoading] = useState(true);
 
   // État local pour mise à jour immédiate de l'interface
   const isInReduxFavorites = favorites.some(
@@ -103,17 +102,10 @@ export default function EventDetailScreen({
           source={{ uri: event.imageUrl }}
           style={styles.eventImage}
           eventId={event.id}
-          onLoadStart={() => setImageLoading(true)}
-          onLoadEnd={() => setImageLoading(false)}
           loadingIndicatorSize="large"
           loadingIndicatorColor="#007AFF"
           resizeMode="cover"
         />
-        {imageLoading && (
-          <View style={styles.imageLoader}>
-            <ActivityIndicator size="large" color="#007AFF" />
-          </View>
-        )}
 
         {/* Bouton favori en overlay */}
         <TouchableOpacity

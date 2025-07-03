@@ -65,6 +65,9 @@ export const CachedImage: React.FC<CachedImageProps> = ({
           // Utiliser l'image en cache
           setImageSource({ uri: cachedPath });
           console.log(`📱 Image chargée depuis le cache: ${eventId}`);
+          // Image en cache = chargement instantané
+          setIsLoading(false);
+          onLoadEnd?.();
         } else {
           // Utiliser l'image originale et démarrer le téléchargement en arrière-plan
           setImageSource(source);
@@ -90,7 +93,7 @@ export const CachedImage: React.FC<CachedImageProps> = ({
     return () => {
       isMounted = false;
     };
-  }, [source.uri, eventId, onLoadStart]);
+  }, [source.uri, eventId, onLoadStart, onLoadEnd]);
 
   const handleImageLoad = () => {
     setIsLoading(false);
